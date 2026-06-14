@@ -1,49 +1,104 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Hintergrund beige -->
   <rect width="512" height="512" rx="112" fill="#F2E8DC"/>
 
-  <!-- Lilie — Linien-Art, zentriert bei 256,256 -->
-  <g transform="translate(256,256)" stroke="#7A4F3A" stroke-linecap="round" stroke-linejoin="round" fill="none">
+  <!--
+    Lilie von oben, 6 Blütenblätter.
+    Breite, spitz zulaufende Petalen — botanischer Stil.
+    Innere 3 (60/180/300) zuerst gezeichnet = hinter den äußeren.
+    Petal-Template: schmal an der Basis, weit in der Mitte, spitze Spitze.
+  -->
+  <g transform="translate(256,258)" stroke="#7A4F3A" stroke-linecap="round" stroke-linejoin="round">
 
-    <!-- 3 äußere Blütenblätter (länger, bei 0°, 120°, 240°) -->
-    <path stroke-width="7.5"
-      d="M0,0 C-22,-34 -26,-82 0,-126 C26,-82 22,-34 0,0"
-      transform="rotate(0)"/>
-    <path stroke-width="7.5"
-      d="M0,0 C-22,-34 -26,-82 0,-126 C26,-82 22,-34 0,0"
-      transform="rotate(120)"/>
-    <path stroke-width="7.5"
-      d="M0,0 C-22,-34 -26,-82 0,-126 C26,-82 22,-34 0,0"
-      transform="rotate(240)"/>
+    <!-- INNERE DREI (hinter den äußeren) -->
+    <g stroke-width="5.5">
+      <path fill="#EDE5D6"
+        d="M -9,12 C -28,-6 -50,-55 -42,-118
+           C -36,-170 -16,-210 0,-216
+           C 16,-210 36,-170 42,-118
+           C 50,-55 28,-6 9,12 Z"
+        transform="rotate(60)"/>
+      <path fill="none" stroke-width="2"
+        d="M 0,10 C 1,-52 1,-144 0,-212" transform="rotate(60)"/>
 
-    <!-- 3 innere Blütenblätter (kürzer, bei 60°, 180°, 300°) -->
-    <path stroke-width="7.5"
-      d="M0,0 C-17,-26 -19,-62 0,-96 C19,-62 17,-26 0,0"
-      transform="rotate(60)"/>
-    <path stroke-width="7.5"
-      d="M0,0 C-17,-26 -19,-62 0,-96 C19,-62 17,-26 0,0"
-      transform="rotate(180)"/>
-    <path stroke-width="7.5"
-      d="M0,0 C-17,-26 -19,-62 0,-96 C19,-62 17,-26 0,0"
-      transform="rotate(300)"/>
+      <path fill="#EDE5D6"
+        d="M -9,12 C -28,-6 -50,-55 -42,-118
+           C -36,-170 -16,-210 0,-216
+           C 16,-210 36,-170 42,-118
+           C 50,-55 28,-6 9,12 Z"
+        transform="rotate(180)"/>
+      <path fill="none" stroke-width="2"
+        d="M 0,10 C 1,-52 1,-144 0,-212" transform="rotate(180)"/>
 
-    <!-- 6 Staubfäden — leicht geschwungen, elegant dünn -->
-    <path stroke-width="4.5" d="M0,-4 C2,-24  1,-44 -3,-64" transform="rotate(0)"/>
-    <path stroke-width="4.5" d="M0,-4 C2,-24  1,-44 -3,-64" transform="rotate(60)"/>
-    <path stroke-width="4.5" d="M0,-4 C2,-24  1,-44 -3,-64" transform="rotate(120)"/>
-    <path stroke-width="4.5" d="M0,-4 C2,-24  1,-44 -3,-64" transform="rotate(180)"/>
-    <path stroke-width="4.5" d="M0,-4 C2,-24  1,-44 -3,-64" transform="rotate(240)"/>
-    <path stroke-width="4.5" d="M0,-4 C2,-24  1,-44 -3,-64" transform="rotate(300)"/>
+      <path fill="#EDE5D6"
+        d="M -9,12 C -28,-6 -50,-55 -42,-118
+           C -36,-170 -16,-210 0,-216
+           C 16,-210 36,-170 42,-118
+           C 50,-55 28,-6 9,12 Z"
+        transform="rotate(300)"/>
+      <path fill="none" stroke-width="2"
+        d="M 0,10 C 1,-52 1,-144 0,-212" transform="rotate(300)"/>
+    </g>
 
-    <!-- Antheren (kleine Punkte an den Staubfaden-Spitzen) -->
-    <circle cx="-3" cy="-64" r="5" fill="#7A4F3A" stroke="none" transform="rotate(0)"/>
-    <circle cx="-3" cy="-64" r="5" fill="#7A4F3A" stroke="none" transform="rotate(60)"/>
-    <circle cx="-3" cy="-64" r="5" fill="#7A4F3A" stroke="none" transform="rotate(120)"/>
-    <circle cx="-3" cy="-64" r="5" fill="#7A4F3A" stroke="none" transform="rotate(180)"/>
-    <circle cx="-3" cy="-64" r="5" fill="#7A4F3A" stroke="none" transform="rotate(240)"/>
-    <circle cx="-3" cy="-64" r="5" fill="#7A4F3A" stroke="none" transform="rotate(300)"/>
+    <!-- ÄUSSERE DREI (vorne, breiter und etwas länger) -->
+    <g stroke-width="6.5">
+      <path fill="#FAF6F0"
+        d="M -11,14 C -34,-8 -60,-58 -52,-126
+           C -46,-182 -20,-220 0,-228
+           C 20,-220 46,-182 52,-126
+           C 60,-58 34,-8 11,14 Z"
+        transform="rotate(0)"/>
+      <path fill="none" stroke-width="2.8"
+        d="M 0,12 C 2,-56 2,-152 0,-224" transform="rotate(0)"/>
 
-    <!-- Kleiner Stiel — nach unten, leicht geschwungen -->
-    <path stroke-width="6" d="M0,8 C4,40 6,75 10,105"/>
+      <path fill="#FAF6F0"
+        d="M -11,14 C -34,-8 -60,-58 -52,-126
+           C -46,-182 -20,-220 0,-228
+           C 20,-220 46,-182 52,-126
+           C 60,-58 34,-8 11,14 Z"
+        transform="rotate(120)"/>
+      <path fill="none" stroke-width="2.8"
+        d="M 0,12 C 2,-56 2,-152 0,-224" transform="rotate(120)"/>
+
+      <path fill="#FAF6F0"
+        d="M -11,14 C -34,-8 -60,-58 -52,-126
+           C -46,-182 -20,-220 0,-228
+           C 20,-220 46,-182 52,-126
+           C 60,-58 34,-8 11,14 Z"
+        transform="rotate(240)"/>
+      <path fill="none" stroke-width="2.8"
+        d="M 0,12 C 2,-56 2,-152 0,-224" transform="rotate(240)"/>
+    </g>
+
+    <!-- STAUBFÄDEN (6, leicht geschwungen) -->
+    <g fill="none" stroke="#7A4F3A" stroke-width="3.5">
+      <path d="M 0,-5 C 6,-24 4,-52 -3,-76" transform="rotate(0)"/>
+      <path d="M 0,-5 C 6,-24 4,-52 -3,-76" transform="rotate(60)"/>
+      <path d="M 0,-5 C 6,-24 4,-52 -3,-76" transform="rotate(120)"/>
+      <path d="M 0,-5 C 6,-24 4,-52 -3,-76" transform="rotate(180)"/>
+      <path d="M 0,-5 C 6,-24 4,-52 -3,-76" transform="rotate(240)"/>
+      <path d="M 0,-5 C 6,-24 4,-52 -3,-76" transform="rotate(300)"/>
+    </g>
+
+    <!-- ANTHEREN (ovale Staubbeutel) -->
+    <g fill="#7A4F3A" stroke="none">
+      <ellipse cx="-3" cy="-81" rx="5" ry="9" transform="rotate(0)"/>
+      <ellipse cx="-3" cy="-81" rx="5" ry="9" transform="rotate(60)"/>
+      <ellipse cx="-3" cy="-81" rx="5" ry="9" transform="rotate(120)"/>
+      <ellipse cx="-3" cy="-81" rx="5" ry="9" transform="rotate(180)"/>
+      <ellipse cx="-3" cy="-81" rx="5" ry="9" transform="rotate(240)"/>
+      <ellipse cx="-3" cy="-81" rx="5" ry="9" transform="rotate(300)"/>
+    </g>
+
+    <!-- GRIFFEL + 3-LAPPIGE NARBE -->
+    <line x1="0" y1="-5" x2="0" y2="-96"
+      stroke="#7A4F3A" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M0,-96 C-3,-106 -8,-114 -10,-120
+             M0,-96 C0,-108 0,-118 0,-124
+             M0,-96 C3,-106 8,-114 10,-120"
+      fill="none" stroke="#7A4F3A" stroke-width="3.5" stroke-linecap="round"/>
+
+    <!-- BLÜTENMITTE -->
+    <circle cx="0" cy="0" r="10"
+      fill="#F2E8DC" stroke="#7A4F3A" stroke-width="5"/>
   </g>
 </svg>
