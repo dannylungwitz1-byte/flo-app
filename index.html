@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1419" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=2" />
+  <title>Flo</title>
+</head>
+<body>
+  <header class="app-header">
+    <h1 id="view-title">Aufgaben</h1>
+    <span id="today-label" class="today-label"></span>
+  </header>
+
+  <main id="main">
+    <!-- Aufgaben -->
+    <section class="view" data-view="aufgaben">
+      <form id="task-form" class="add-form">
+        <input id="task-input" type="text" placeholder="Neue Aufgabe…" autocomplete="off" />
+        <button type="submit" aria-label="Hinzufügen">+</button>
+      </form>
+      <ul id="task-list" class="list"></ul>
+      <p id="task-empty" class="empty">Noch nichts zu tun. Genieß den Moment. 🌿</p>
+    </section>
+
+    <!-- Notizen -->
+    <section class="view" data-view="notizen" hidden>
+      <form id="note-form" class="add-form">
+        <input id="note-input" type="text" placeholder="Schnelle Notiz…" autocomplete="off" />
+        <button type="submit" aria-label="Hinzufügen">+</button>
+      </form>
+      <ul id="note-list" class="list"></ul>
+      <p id="note-empty" class="empty">Kopf leer, Liste leer. ✍️</p>
+    </section>
+
+    <!-- Kalender -->
+    <section class="view" data-view="kalender" hidden>
+      <form id="event-form" class="add-form column">
+        <input id="event-input" type="text" placeholder="Termin…" autocomplete="off" />
+        <div class="row">
+          <input id="event-date" type="date" />
+          <input id="event-time" type="time" />
+          <button type="submit" aria-label="Hinzufügen">+</button>
+        </div>
+      </form>
+      <ul id="event-list" class="list"></ul>
+      <p id="event-empty" class="empty">Keine Termine. Frei wie ein Vogel. 🕊️</p>
+    </section>
+
+    <!-- Gewohnheiten -->
+    <section class="view" data-view="gewohnheiten" hidden>
+      <form id="habit-form" class="add-form">
+        <input id="habit-input" type="text" placeholder="Neue Gewohnheit…" autocomplete="off" />
+        <button type="submit" aria-label="Hinzufügen">+</button>
+      </form>
+      <ul id="habit-list" class="list"></ul>
+      <p id="habit-empty" class="empty">Welche Routine willst du aufbauen? 💪</p>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button class="tab active" data-tab="aufgaben"><span class="ico">✓</span>Aufgaben</button>
+    <button class="tab" data-tab="notizen"><span class="ico">✎</span>Notizen</button>
+    <button class="tab" data-tab="kalender"><span class="ico">▦</span>Kalender</button>
+    <button class="tab" data-tab="gewohnheiten"><span class="ico">◴</span>Routinen</button>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>
