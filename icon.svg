@@ -1,5 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#0f1419"/>
-  <circle cx="256" cy="256" r="150" fill="none" stroke="#4f9cf9" stroke-width="34"/>
-  <path d="M196 256 L240 300 L324 212" fill="none" stroke="#5fd38b" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Hintergrund beige -->
+  <rect width="512" height="512" rx="112" fill="#F2E8DC"/>
+
+  <!-- Lilie — Linien-Art, zentriert bei 256,256 -->
+  <g transform="translate(256,256)" stroke="#7A4F3A" stroke-linecap="round" stroke-linejoin="round" fill="none">
+
+    <!-- 3 äußere Blütenblätter (länger, bei 0°, 120°, 240°) -->
+    <path stroke-width="7.5"
+      d="M0,0 C-22,-34 -26,-82 0,-126 C26,-82 22,-34 0,0"
+      transform="rotate(0)"/>
+    <path stroke-width="7.5"
+      d="M0,0 C-22,-34 -26,-82 0,-126 C26,-82 22,-34 0,0"
+      transform="rotate(120)"/>
+    <path stroke-width="7.5"
+      d="M0,0 C-22,-34 -26,-82 0,-126 C26,-82 22,-34 0,0"
+      transform="rotate(240)"/>
+
+    <!-- 3 innere Blütenblätter (kürzer, bei 60°, 180°, 300°) -->
+    <path stroke-width="7.5"
+      d="M0,0 C-17,-26 -19,-62 0,-96 C19,-62 17,-26 0,0"
+      transform="rotate(60)"/>
+    <path stroke-width="7.5"
+      d="M0,0 C-17,-26 -19,-62 0,-96 C19,-62 17,-26 0,0"
+      transform="rotate(180)"/>
+    <path stroke-width="7.5"
+      d="M0,0 C-17,-26 -19,-62 0,-96 C19,-62 17,-26 0,0"
+      transform="rotate(300)"/>
+
+    <!-- 6 Staubfäden — leicht geschwungen, elegant dünn -->
+    <path stroke-width="4.5" d="M0,-4 C2,-24  1,-44 -3,-64" transform="rotate(0)"/>
+    <path stroke-width="4.5" d="M0,-4 C2,-24  1,-44 -3,-64" transform="rotate(60)"/>
+    <path stroke-width="4.5" d="M0,-4 C2,-24  1,-44 -3,-64" transform="rotate(120)"/>
+    <path stroke-width="4.5" d="M0,-4 C2,-24  1,-44 -3,-64" transform="rotate(180)"/>
+    <path stroke-width="4.5" d="M0,-4 C2,-24  1,-44 -3,-64" transform="rotate(240)"/>
+    <path stroke-width="4.5" d="M0,-4 C2,-24  1,-44 -3,-64" transform="rotate(300)"/>
+
+    <!-- Antheren (kleine Punkte an den Staubfaden-Spitzen) -->
+    <circle cx="-3" cy="-64" r="5" fill="#7A4F3A" stroke="none" transform="rotate(0)"/>
+    <circle cx="-3" cy="-64" r="5" fill="#7A4F3A" stroke="none" transform="rotate(60)"/>
+    <circle cx="-3" cy="-64" r="5" fill="#7A4F3A" stroke="none" transform="rotate(120)"/>
+    <circle cx="-3" cy="-64" r="5" fill="#7A4F3A" stroke="none" transform="rotate(180)"/>
+    <circle cx="-3" cy="-64" r="5" fill="#7A4F3A" stroke="none" transform="rotate(240)"/>
+    <circle cx="-3" cy="-64" r="5" fill="#7A4F3A" stroke="none" transform="rotate(300)"/>
+
+    <!-- Kleiner Stiel — nach unten, leicht geschwungen -->
+    <path stroke-width="6" d="M0,8 C4,40 6,75 10,105"/>
+  </g>
 </svg>

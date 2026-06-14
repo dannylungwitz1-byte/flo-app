@@ -1,6 +1,6 @@
 // Service Worker — macht Flo offline-fähig und installierbar.
-const CACHE = "flo-v2";
-const ASSETS = ["./", "index.html", "styles.css", "app.js", "manifest.webmanifest", "icon.svg"];
+const CACHE = "flo-v3";
+const ASSETS = ["./", "index.html", "styles.css", "app.js", "manifest.webmanifest", "icon.svg", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
