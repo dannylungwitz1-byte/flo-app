@@ -354,37 +354,43 @@ $("#goal-btn").addEventListener("click", () => {
 });
 
 // ---------- Wasserzähler ----------
+// Ziel in ml, Schluck in ml, Anzeige in L
 function renderWater() {
-  const goal = store.get("waterGoal", 8);
-  const count = store.get("water-" + TODAY, 0);
-  const fraction = Math.min(1, count / goal);
+  const goalMl = store.get("waterGoalMl", 2000);
+  const drunkMl = store.get("water-ml-" + TODAY, 0);
+  const fraction = Math.min(1, drunkMl / goalMl);
   const translateY = Math.round((1 - fraction) * 148);
   const rect = $("#water-fill-rect");
   if (rect) rect.style.transform = `translateY(${translateY}px)`;
   const wc = $("#water-count");
-  if (wc) wc.textContent = count;
+  if (wc) wc.textContent = (drunkMl / 1000).toFixed(1).replace(".", ",") + " L";
   const wg = $("#water-goal-disp");
-  if (wg) wg.textContent = goal;
+  if (wg) wg.textContent = (goalMl / 1000).toFixed(1).replace(".", ",") + " L";
 }
 
 $("#water-plus").addEventListener("click", () => {
-  const goal = store.get("waterGoal", 8);
-  const cur = store.get("water-" + TODAY, 0);
-  if (cur < goal) { store.set("water-" + TODAY, cur + 1); renderWater(); }
+  const goalMl = store.get("waterGoalMl", 2000);
+  const schluckMl = store.get("waterSchluckMl", 250);
+  const cur = store.get("water-ml-" + TODAY, 0);
+  if (cur < goalMl) { store.set("water-ml-" + TODAY, Math.min(goalMl, cur + schluckMl)); renderWater(); }
 });
 $("#water-minus").addEventListener("click", () => {
-  const cur = store.get("water-" + TODAY, 0);
-  if (cur > 0) { store.set("water-" + TODAY, cur - 1); renderWater(); }
+  const schluckMl = store.get("waterSchluckMl", 250);
+  const cur = store.get("water-ml-" + TODAY, 0);
+  if (cur > 0) { store.set("water-ml-" + TODAY, Math.max(0, cur - schluckMl)); renderWater(); }
 });
 $("#water-goal-btn").addEventListener("click", () => {
-  const goal = store.get("waterGoal", 8);
+  const goalL = store.get("waterGoalMl", 2000) / 1000;
+  const schluck = store.get("waterSchluckMl", 250);
   const sheet = document.createElement("div");
   sheet.className = "sheet-overlay";
   sheet.innerHTML = `
     <div class="sheet">
-      <div class="sheet-title">Tagesziel Wasser</div>
-      <p class="sheet-goal-label">Anzahl Gläser</p>
-      <input type="number" id="w-goal" value="${goal}" min="1" max="20"/>
+      <div class="sheet-title">Wasserziel</div>
+      <p class="sheet-goal-label">Tagesziel (Liter)</p>
+      <input type="number" id="w-goal" value="${goalL}" min="0.5" max="6" step="0.1" style="margin-bottom:14px"/>
+      <p class="sheet-goal-label">Menge pro Schluck (ml)</p>
+      <input type="number" id="w-schluck" value="${schluck}" min="50" max="1000" step="50"/>
       <div class="sheet-actions">
         <button class="sheet-cancel">Abbrechen</button>
         <button class="accent-btn sheet-save">Speichern</button>
@@ -392,7 +398,8 @@ $("#water-goal-btn").addEventListener("click", () => {
     </div>`;
   sheet.querySelector(".sheet-cancel").onclick = () => document.body.removeChild(sheet);
   sheet.querySelector(".sheet-save").onclick = () => {
-    store.set("waterGoal", parseInt(sheet.querySelector("#w-goal").value) || 8);
+    store.set("waterGoalMl", Math.round((parseFloat(sheet.querySelector("#w-goal").value) || 2) * 1000));
+    store.set("waterSchluckMl", parseInt(sheet.querySelector("#w-schluck").value) || 250);
     document.body.removeChild(sheet);
     renderWater();
   };
