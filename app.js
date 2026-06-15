@@ -609,6 +609,7 @@ $("#zyklus-edit-btn").addEventListener("click", () => {
 const TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 const TAGE_LANG = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
 let activeWeek = 1;
+let activeDay = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1; // 0=Mo … 6=So
 
 function renderTraining() {
   // Wochenwähler
@@ -617,30 +618,50 @@ function renderTraining() {
   for (let w = 1; w <= 12; w++) {
     const chip = document.createElement("div");
     chip.className = "week-chip" + (w === activeWeek ? " active" : "");
-    chip.textContent = "Woche " + w;
+    chip.textContent = "W" + w;
     chip.onclick = () => { activeWeek = w; renderTraining(); };
     picker.appendChild(chip);
   }
-  // Scroll aktive Woche sichtbar
   const activeChip = picker.querySelector(".week-chip.active");
   if (activeChip) activeChip.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
 
-  // Tage der Woche
+  // Großes Tages-Card
   const container = $("#training-days");
   container.innerHTML = "";
-  TAGE.forEach((tag, i) => {
-    const key = "training-w" + activeWeek + "-d" + (i + 1);
-    const plan = store.get(key, "");
-    const row = document.createElement("div");
-    row.className = "training-day" + (plan ? " has-plan" : "");
-    row.innerHTML = `
-      <div class="training-day-label"></div>
-      <div class="training-day-plan"></div>`;
-    row.querySelector(".training-day-label").textContent = tag;
-    row.querySelector(".training-day-plan").textContent = plan || "Kein Training geplant";
-    row.onclick = () => openDaySheet(activeWeek, i + 1, TAGE_LANG[i], key);
-    container.appendChild(row);
+
+  // Tagespunkte
+  const dots = document.createElement("div");
+  dots.className = "training-dots";
+  TAGE.forEach((t, i) => {
+    const dot = document.createElement("div");
+    dot.className = "training-dot" + (i === activeDay ? " active" : "");
+    dot.textContent = t;
+    dot.onclick = () => { activeDay = i; renderTraining(); };
+    dots.appendChild(dot);
   });
+  container.appendChild(dots);
+
+  // Großes Card
+  const key = "training-w" + activeWeek + "-d" + (activeDay + 1);
+  const plan = store.get(key, "");
+  const card = document.createElement("div");
+  card.className = "training-card";
+  card.innerHTML = `
+    <div class="training-card-day">${TAGE_LANG[activeDay]}</div>
+    <div class="training-card-plan">${plan || "Noch kein Training eingetragen.\nTippe zum Bearbeiten."}</div>
+    <button class="training-edit-btn">✎ Bearbeiten</button>`;
+  card.querySelector(".training-edit-btn").onclick = () => openDaySheet(activeWeek, activeDay + 1, TAGE_LANG[activeDay], key);
+  container.appendChild(card);
+
+  // Swipe
+  let touchStartX = 0;
+  card.addEventListener("touchstart", (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  card.addEventListener("touchend", (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) < 40) return;
+    if (dx < 0 && activeDay < 6) { activeDay++; renderTraining(); }
+    if (dx > 0 && activeDay > 0) { activeDay--; renderTraining(); }
+  }, { passive: true });
 }
 
 function openDaySheet(week, dayNum, dayName, key) {

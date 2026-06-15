@@ -462,30 +462,59 @@ main { padding: 22px 20px 0; max-width: 600px; margin: 0 auto; }
   color: #fff;
 }
 
-.training-days { display: flex; flex-direction: column; gap: 10px; }
-.training-day {
+.training-days { display: flex; flex-direction: column; gap: 16px; }
+
+.training-dots {
+  display: flex; justify-content: space-between; gap: 4px;
+}
+.training-dot {
+  flex: 1; text-align: center;
+  padding: 7px 0;
+  border-radius: 12px;
+  font-family: var(--body); font-size: 13px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.15s;
+}
+.training-dot.active {
+  background: var(--accent); border-color: var(--accent);
+  color: #fff; font-weight: 600;
+}
+
+.training-card {
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px 16px;
-  cursor: pointer;
-  display: flex; align-items: center; gap: 14px;
-  -webkit-tap-highlight-color: transparent;
-  transition: border-color 0.12s;
+  padding: 28px 24px 24px;
+  min-height: 260px;
+  display: flex; flex-direction: column; gap: 16px;
+  user-select: none;
 }
-.training-day:active { border-color: var(--accent); }
-.training-day.has-plan { border-left: 3px solid var(--ok); }
-.training-day-label {
-  font-family: var(--serif); font-size: 17px;
-  min-width: 36px; flex-shrink: 0;
+.training-card-day {
+  font-family: var(--serif); font-size: 28px;
+  color: var(--text);
 }
-.training-day-plan {
-  flex: 1; font-size: 16px;
+.training-card-plan {
+  flex: 1;
+  font-size: 17px; line-height: 1.7;
   color: var(--muted); font-style: italic;
-  line-height: 1.4;
+  white-space: pre-wrap;
 }
-.training-day.has-plan .training-day-plan {
+.training-card:has(.training-card-plan:not(:empty)) .training-card-plan {
   color: var(--text); font-style: normal;
+}
+.training-edit-btn {
+  align-self: flex-start;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-family: var(--body); font-size: 15px;
+  color: var(--muted); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ── Bottom sheet modal ── */
