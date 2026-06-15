@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "flo",
-      "runtimeExecutable": "python3",
+      "runtimeExecutable": "/usr/bin/python3",
       "runtimeArgs": ["-m", "http.server", "4173", "--directory", "/Users/dannylungwitz/App Flo"],
       "port": 4173
     }

@@ -42,14 +42,14 @@ $("#drawer-close").addEventListener("click", closeDrawer);
 overlay.addEventListener("click", closeDrawer);
 
 const VIEW_TITLES = {
-  aufgaben: "Aufgaben",
-  listen: "Listen",
-  kalender: "Kalender",
-  gewohnheiten: "Routinen",
-  kalorien: "Kalorien & Wasser",
-  zyklus: "Zyklus & Pille",
-  bibel: "Bibeltagebuch",
-  training: "Trainingsplan",
+  aufgaben:    "Aufgaben",
+  tagebuch:    "Tagebuch",
+  listen:      "Listen",
+  kalender:    "Kalender",
+  gewohnheiten:"Routinen",
+  kalorien:    "Kalorien & Wasser",
+  zyklus:      "Zyklus & Pille",
+  training:    "Trainingsplan",
 };
 
 function navigateTo(view) {
@@ -59,9 +59,11 @@ function navigateTo(view) {
   });
   $("#view-title").textContent = VIEW_TITLES[view] || view;
   closeDrawer();
-  if (view === "kalorien") renderMacros();
-  if (view === "zyklus") renderZyklus();
-  if (view === "training") renderTraining();
+  if (view === "kalorien")    renderMacros();
+  if (view === "zyklus")      renderZyklus();
+  if (view === "training")    renderTraining();
+  if (view === "tagebuch")    renderTabebuch();
+  if (view === "kalender")    renderKalender();
 }
 
 document.querySelectorAll(".nav-item[data-view]").forEach((item) => {
@@ -100,6 +102,184 @@ $("#task-form").addEventListener("submit", (e) => {
   renderTasks();
 });
 renderTasks();
+
+// ---------- Tagebuch & Stimmung ----------
+const MOODS = [
+  { id: 0, label: "Strahlend", color: "#F4C440", color2: "#E0A020",
+    svg: `<svg viewBox="0 0 40 40" width="32" height="32" fill="none">
+      <circle cx="14" cy="15" r="2.8" fill="rgba(0,0,0,0.45)"/>
+      <circle cx="26" cy="15" r="2.8" fill="rgba(0,0,0,0.45)"/>
+      <circle cx="15.5" cy="13.5" r="1.1" fill="white" opacity="0.9"/>
+      <circle cx="27.5" cy="13.5" r="1.1" fill="white" opacity="0.9"/>
+      <path d="M10 23 Q20 34 30 23" stroke="rgba(0,0,0,0.45)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <path d="M20 3 L20 6" stroke="rgba(0,0,0,0.3)" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M30 6 L28 8.5" stroke="rgba(0,0,0,0.3)" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M10 6 L12 8.5" stroke="rgba(0,0,0,0.3)" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>` },
+  { id: 1, label: "Gut", color: "#E8907A", color2: "#C86850",
+    svg: `<svg viewBox="0 0 40 40" width="32" height="32" fill="none">
+      <circle cx="14" cy="15" r="2.8" fill="rgba(0,0,0,0.45)"/>
+      <circle cx="26" cy="15" r="2.8" fill="rgba(0,0,0,0.45)"/>
+      <path d="M12 23 Q20 31 28 23" stroke="rgba(0,0,0,0.45)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+    </svg>` },
+  { id: 2, label: "Okay", color: "#82B09A", color2: "#5A906E",
+    svg: `<svg viewBox="0 0 40 40" width="32" height="32" fill="none">
+      <circle cx="14" cy="15" r="2.8" fill="rgba(0,0,0,0.4)"/>
+      <circle cx="26" cy="15" r="2.8" fill="rgba(0,0,0,0.4)"/>
+      <line x1="12" y1="26" x2="28" y2="26" stroke="rgba(0,0,0,0.4)" stroke-width="2.8" stroke-linecap="round"/>
+    </svg>` },
+  { id: 3, label: "Trüb", color: "#7496B0", color2: "#4E7090",
+    svg: `<svg viewBox="0 0 40 40" width="32" height="32" fill="none">
+      <circle cx="14" cy="16" r="2.8" fill="rgba(0,0,0,0.4)"/>
+      <circle cx="26" cy="16" r="2.8" fill="rgba(0,0,0,0.4)"/>
+      <path d="M11 12.5 Q14 10.5 17 12.5" stroke="rgba(0,0,0,0.35)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <path d="M23 12.5 Q26 10.5 29 12.5" stroke="rgba(0,0,0,0.35)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <path d="M13 29 Q20 22 27 29" stroke="rgba(0,0,0,0.4)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+    </svg>` },
+  { id: 4, label: "Schwer", color: "#9485BA", color2: "#6A5898",
+    svg: `<svg viewBox="0 0 40 40" width="32" height="32" fill="none">
+      <circle cx="14" cy="17" r="2.8" fill="rgba(0,0,0,0.45)"/>
+      <circle cx="26" cy="17" r="2.8" fill="rgba(0,0,0,0.45)"/>
+      <path d="M10 11 Q14 14 17 11" stroke="rgba(0,0,0,0.45)" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M23 11 Q26 14 30 11" stroke="rgba(0,0,0,0.45)" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M12 31 Q20 22 28 31" stroke="rgba(0,0,0,0.45)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+    </svg>` },
+];
+
+let todayMoodSelected = -1;
+
+function renderTabebuch() {
+  // Greeting + date
+  const h = heute.getHours();
+  const greeting = h < 12 ? "Guten Morgen" : h < 18 ? "Wie war dein Tag?" : "Guten Abend";
+  $("#journal-greeting").textContent = greeting;
+  $("#journal-date-sub").textContent = heute.toLocaleDateString("de-DE", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric"
+  });
+  $("#journal-page-day").textContent = heute.toLocaleDateString("de-DE", { weekday: "long" });
+  $("#journal-page-date").textContent = heute.toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric" });
+
+  // Load saved entry for today
+  const saved = store.get("tag-" + TODAY, null);
+  todayMoodSelected = saved ? saved.mood : -1;
+
+  // Journal text
+  const ta = $("#journal-textarea");
+  ta.value = saved ? (saved.text || "") : "";
+
+  // Auto-save on input
+  ta.oninput = () => saveDayEntry(false);
+
+  // Render mood circles
+  const row = $("#mood-row");
+  row.innerHTML = "";
+  if (todayMoodSelected >= 0) row.classList.add("has-selection");
+  else row.classList.remove("has-selection");
+
+  MOODS.forEach((m) => {
+    const circle = document.createElement("div");
+    circle.className = "mood-circle" + (m.id === todayMoodSelected ? " sel" : "");
+    circle.style.background = `linear-gradient(135deg, ${m.color} 0%, ${m.color2} 100%)`;
+    circle.innerHTML = m.svg;
+    circle.onclick = () => selectMood(m.id);
+    row.appendChild(circle);
+  });
+
+  updateMoodLabel();
+  updateMoodSelectorBg();
+  renderMoodHistory();
+}
+
+function selectMood(id) {
+  todayMoodSelected = todayMoodSelected === id ? -1 : id;
+  const row = $("#mood-row");
+  if (todayMoodSelected >= 0) row.classList.add("has-selection");
+  else row.classList.remove("has-selection");
+  row.querySelectorAll(".mood-circle").forEach((c, i) => {
+    c.classList.toggle("sel", i === todayMoodSelected);
+  });
+  updateMoodLabel();
+  updateMoodSelectorBg();
+  saveDayEntry(false);
+}
+
+function updateMoodLabel() {
+  const label = $("#mood-name");
+  if (todayMoodSelected >= 0) {
+    label.textContent = MOODS[todayMoodSelected].label;
+    label.style.color = MOODS[todayMoodSelected].color2;
+  } else {
+    label.textContent = "";
+  }
+}
+
+function updateMoodSelectorBg() {
+  const sel = $("#mood-selector");
+  if (todayMoodSelected >= 0) {
+    const c = MOODS[todayMoodSelected].color;
+    sel.style.background = `linear-gradient(160deg, ${c}18 0%, #ffffff 60%)`;
+  } else {
+    sel.style.background = "";
+  }
+}
+
+function saveDayEntry(showIndicator = true) {
+  const text = $("#journal-textarea").value;
+  store.set("tag-" + TODAY, { mood: todayMoodSelected, text, ts: Date.now() });
+  renderMoodHistory();
+  if (showIndicator) {
+    const ind = $("#journal-saved-indicator");
+    ind.classList.add("show");
+    setTimeout(() => ind.classList.remove("show"), 1800);
+  }
+}
+
+$("#journal-save-btn").addEventListener("click", () => saveDayEntry(true));
+
+function renderMoodHistory() {
+  const row = $("#mood-dots-row");
+  if (!row) return;
+  row.innerHTML = "";
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = dateKey(d);
+    const entry = store.get("tag-" + key, null);
+    const dot = document.createElement("div");
+    dot.className = "mood-hist-dot" + (key === TODAY ? " today-dot" : "");
+    if (entry && entry.mood >= 0) {
+      dot.style.background = `linear-gradient(135deg, ${MOODS[entry.mood].color}, ${MOODS[entry.mood].color2})`;
+      dot.classList.add("has-entry");
+    }
+    dot.title = d.toLocaleDateString("de-DE", { day: "numeric", month: "short" });
+    dot.onclick = () => {
+      if (entry) openPastEntrySheet(key, entry, d);
+    };
+    row.appendChild(dot);
+  }
+}
+
+function openPastEntrySheet(key, entry, dateObj) {
+  const mood = entry.mood >= 0 ? MOODS[entry.mood] : null;
+  const sheet = document.createElement("div");
+  sheet.className = "sheet-overlay";
+  const dateStr = dateObj.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" });
+  sheet.innerHTML = `
+    <div class="sheet">
+      <div class="sheet-title" style="margin-bottom:10px">${dateStr}</div>
+      ${mood ? `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div class="past-entry-mood-circle" style="background:linear-gradient(135deg,${mood.color},${mood.color2})">${mood.svg}</div>
+          <div style="font-family:var(--serif);font-size:18px;font-style:italic;color:${mood.color2}">${mood.label}</div>
+        </div>` : ""}
+      ${entry.text ? `<div class="past-entry-text">${entry.text.replace(/</g,"&lt;").replace(/\n/g,"<br>")}</div>`
+                   : `<div class="past-entry-empty">Kein Eintrag an diesem Tag.</div>`}
+      <div class="sheet-actions" style="margin-top:20px">
+        <button class="sheet-cancel" style="flex:1">Schließen</button>
+      </div>
+    </div>`;
+  sheet.querySelector(".sheet-cancel").onclick = () => document.body.removeChild(sheet);
+  document.body.appendChild(sheet);
+}
 
 // ---------- Listen ----------
 function renderListen() {
@@ -150,7 +330,6 @@ function openListSheet(listId) {
   sheet.querySelector(".sheet-cancel").onclick = () => { document.body.removeChild(sheet); renderListen(); };
 
   sheet.querySelector(".listen-del-btn").onclick = () => {
-    if (!confirm("Liste löschen?")) return;
     const updated = store.get("listen", []).filter(l => l.id !== listId);
     store.set("listen", updated);
     document.body.removeChild(sheet);
@@ -201,7 +380,8 @@ $("#neue-liste-btn").addEventListener("click", () => {
   sheet.innerHTML = `
     <div class="sheet">
       <div class="sheet-title">Neue Liste</div>
-      <input type="text" placeholder="Name der Liste…" autocomplete="off"/>
+      <input type="text" placeholder="Name der Liste…" autocomplete="off"
+        style="width:100%;font-family:var(--body);font-size:17px;border:1.5px solid var(--border-2);border-radius:12px;padding:12px 16px;background:var(--surface);color:var(--text);outline:none;-webkit-appearance:none;"/>
       <div class="sheet-actions" style="margin-top:16px">
         <button class="sheet-cancel">Abbrechen</button>
         <button class="accent-btn sheet-save">Erstellen</button>
@@ -225,29 +405,89 @@ renderListen();
 
 // ---------- Kalender ----------
 let events = store.get("events", []);
-const eventList = $("#event-list");
+
+function renderKalender() {
+  const now = new Date();
+  $("#kal-day-num").textContent = now.getDate();
+  $("#kal-day-name").textContent = now.toLocaleDateString("de-DE", { weekday: "long" });
+  $("#kal-month-name").textContent = now.toLocaleDateString("de-DE", { month: "long", year: "numeric" });
+
+  renderEvents();
+}
+
+function getRelativeLabel(dateStr) {
+  const today = new Date(TODAY + "T00:00:00");
+  const d = new Date(dateStr + "T00:00:00");
+  const diff = Math.round((d - today) / 86400000);
+  if (diff === 0) return "Heute";
+  if (diff === 1) return "Morgen";
+  if (diff === -1) return "Gestern";
+  if (diff > 1 && diff <= 6) return `In ${diff} Tagen`;
+  return null;
+}
 
 function renderEvents() {
-  eventList.innerHTML = "";
+  const container = $("#event-list");
+  if (!container) return;
+  container.innerHTML = "";
   const sorted = [...events].sort((a, b) => (a.when || "").localeCompare(b.when || ""));
-  sorted.forEach((ev) => {
-    const li = document.createElement("li");
-    li.className = "item";
+  const upcoming = sorted.filter(ev => !ev.when || ev.when >= TODAY + "T00:00");
+  const past = sorted.filter(ev => ev.when && ev.when < TODAY + "T00:00");
+  const allToShow = [...upcoming, ...past];
+
+  if (allToShow.length === 0) {
+    $("#event-empty").hidden = false;
+    const title = $("#kal-section-title");
+    if (title) title.textContent = "";
+    return;
+  }
+  $("#event-empty").hidden = true;
+  const title = $("#kal-section-title");
+  if (title) title.textContent = upcoming.length > 0 ? "Bevorstehende Termine" : "Vergangene Termine";
+
+  allToShow.forEach((ev) => {
+    const card = document.createElement("div");
+    card.className = "event-card";
     const d = ev.when ? new Date(ev.when) : null;
-    const sub = d
-      ? d.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" }) +
-        (ev.hasTime ? ", " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) + " Uhr" : "")
-      : "ohne Datum";
-    li.innerHTML = `<div class="item-body"><div class="item-title"></div><div class="item-sub"></div></div><button class="del">×</button>`;
-    li.querySelector(".item-title").textContent = ev.text;
-    li.querySelector(".item-sub").textContent = sub;
-    li.querySelector(".del").onclick = () => { events = events.filter((x) => x.id !== ev.id); store.set("events", events); renderEvents(); };
-    eventList.appendChild(li);
+
+    let badgeDay = "—", badgeMonth = "";
+    if (d) {
+      badgeDay = d.getDate();
+      badgeMonth = d.toLocaleDateString("de-DE", { month: "short" }).replace(".", "");
+    }
+
+    let timeStr = "";
+    if (d) {
+      const rel = getRelativeLabel(dateKey(d));
+      const dayPart = rel || d.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
+      const timePart = ev.hasTime ? d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) + " Uhr" : "";
+      timeStr = timePart ? `${dayPart}, ${timePart}` : dayPart;
+    } else {
+      timeStr = "ohne Datum";
+    }
+
+    card.innerHTML = `
+      <div class="event-date-badge">
+        <div class="event-badge-day">${badgeDay}</div>
+        <div class="event-badge-month">${badgeMonth}</div>
+      </div>
+      <div class="event-body">
+        <div class="event-title"></div>
+        <div class="event-time"></div>
+      </div>
+      <button class="event-del">×</button>`;
+    card.querySelector(".event-title").textContent = ev.text;
+    card.querySelector(".event-time").textContent = timeStr;
+    card.querySelector(".event-del").onclick = () => {
+      events = events.filter((x) => x.id !== ev.id);
+      store.set("events", events);
+      renderEvents();
+    };
+    container.appendChild(card);
   });
-  $("#event-empty").hidden = events.length > 0;
 }
-$("#event-form").addEventListener("submit", (e) => {
-  e.preventDefault();
+
+$("#event-submit").addEventListener("click", () => {
   const text = $("#event-input").value.trim();
   const date = $("#event-date").value;
   const time = $("#event-time").value;
@@ -258,7 +498,6 @@ $("#event-form").addEventListener("submit", (e) => {
   $("#event-input").value = ""; $("#event-date").value = ""; $("#event-time").value = "";
   renderEvents();
 });
-renderEvents();
 
 // ---------- Gewohnheiten ----------
 let habits = store.get("habits", []);
@@ -333,7 +572,6 @@ let macroGoals = store.get("macroGoals", { kcal: 2000, prot: 150 });
 
 function getTodayMeals() { return store.get("meals-" + TODAY, []); }
 function saveTodayMeals(meals) { store.set("meals-" + TODAY, meals); }
-
 function getSavedMeals() { return store.get("saved-meals", []); }
 
 function renderSavedChips() {
@@ -447,7 +685,6 @@ $("#goal-btn").addEventListener("click", () => {
 });
 
 // ---------- Wasserzähler ----------
-// Ziel in ml, Schluck in ml, Anzeige in L
 function renderWater() {
   const goalMl = store.get("waterGoalMl", 2000);
   const drunkMl = store.get("water-ml-" + TODAY, 0);
@@ -505,7 +742,6 @@ let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth();
 
 function getDayInCycle(dateStr, data) {
-  // Parse both as local midnight to avoid UTC timezone shifts
   const start = new Date(data.start + "T00:00:00");
   const d = new Date(dateStr + "T00:00:00");
   const diff = Math.floor((d - start) / 86400000);
@@ -545,7 +781,6 @@ function buildCalDay(dateStr, data, pillDays, otherMonth) {
     const future = dateStr > TODAY;
     if (taken) dot.classList.add("taken");
     else if (!future) dot.classList.add("missed");
-
     if (!future) {
       cell.addEventListener("click", () => {
         store.set("pill-" + dateStr, !store.get("pill-" + dateStr, false));
@@ -590,31 +825,25 @@ function renderZyklus() {
 
   const pillDays = data.pillDays || 21;
 
-  // Monat-Titel
   $("#cal-month-title").textContent = new Date(calYear, calMonth, 1)
     .toLocaleDateString("de-DE", { month: "long", year: "numeric" });
 
-  // Kalender-Grid aufbauen
   const grid = $("#cal-grid");
   grid.innerHTML = "";
 
   const firstDay = new Date(calYear, calMonth, 1);
   const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
 
-  // Mo=0 … So=6
   let startDow = firstDay.getDay();
   startDow = startDow === 0 ? 6 : startDow - 1;
 
-  // Vormonat auffüllen
   for (let i = startDow - 1; i >= 0; i--) {
     const d = new Date(calYear, calMonth, -i);
     grid.appendChild(buildCalDay(dateKey(d), data, pillDays, true));
   }
-  // Aktueller Monat
   for (let d = 1; d <= lastDate; d++) {
     grid.appendChild(buildCalDay(dateKey(new Date(calYear, calMonth, d)), data, pillDays, false));
   }
-  // Nachmonat auffüllen
   const total = startDow + lastDate;
   const trailing = (7 - (total % 7)) % 7;
   for (let i = 1; i <= trailing; i++) {
@@ -622,7 +851,6 @@ function renderZyklus() {
     grid.appendChild(buildCalDay(dateKey(d), data, pillDays, true));
   }
 
-  // Heutige Phase anzeigen
   const todayDIC = getDayInCycle(TODAY, data);
   const phaseTodayBar = $("#phase-today-bar");
   if (todayDIC !== null) {
@@ -703,10 +931,9 @@ $("#zyklus-edit-btn").addEventListener("click", () => {
 const TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 const TAGE_LANG = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
 let activeWeek = 1;
-let activeDay = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1; // 0=Mo … 6=So
+let activeDay = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
 function renderTraining() {
-  // Wochenwähler
   const picker = $("#week-picker");
   picker.innerHTML = "";
   for (let w = 1; w <= 12; w++) {
@@ -719,11 +946,9 @@ function renderTraining() {
   const activeChip = picker.querySelector(".week-chip.active");
   if (activeChip) activeChip.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
 
-  // Großes Tages-Card
   const container = $("#training-days");
   container.innerHTML = "";
 
-  // Tagespunkte
   const dots = document.createElement("div");
   dots.className = "training-dots";
   TAGE.forEach((t, i) => {
@@ -735,7 +960,6 @@ function renderTraining() {
   });
   container.appendChild(dots);
 
-  // Großes Card
   const key = "training-w" + activeWeek + "-d" + (activeDay + 1);
   const plan = store.get(key, "");
   const card = document.createElement("div");
@@ -747,7 +971,6 @@ function renderTraining() {
   card.querySelector(".training-edit-btn").onclick = () => openDaySheet(activeWeek, activeDay + 1, TAGE_LANG[activeDay], key);
   container.appendChild(card);
 
-  // Swipe
   let touchStartX = 0;
   card.addEventListener("touchstart", (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
   card.addEventListener("touchend", (e) => {
@@ -788,4 +1011,3 @@ function openDaySheet(week, dayNum, dayName, key) {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }
-
