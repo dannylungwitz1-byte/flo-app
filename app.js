@@ -733,3 +733,26 @@ function openDaySheet(week, dayNum, dayName, key) {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }
+
+// ---------- PILLEN-ERINNERUNG ----------
+function setupPillReminder() {
+  if (!("Notification" in window)) return;
+  if (Notification.permission === "default") {
+    Notification.requestPermission();
+  }
+  // Jeden Abend um 19:00 prüfen
+  setInterval(() => {
+    const now = new Date();
+    if (now.getHours() === 19 && now.getMinutes() === 0) {
+      if (Notification.permission === "granted") {
+        new Notification("Flo — Pille nehmen 💊", {
+          body: "Vergiss deine Pille nicht! 19:00 Uhr.",
+          icon: "apple-touch-icon.png",
+          tag: "pille-" + dateKey(),
+          renotify: false,
+        });
+      }
+    }
+  }, 30000); // alle 30 Sekunden prüfen
+}
+setupPillReminder();
