@@ -11,34 +11,59 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="styles.css?v=4" />
   <title>Flo</title>
 </head>
 <body>
+
+  <div class="overlay" id="overlay"></div>
+
+  <nav class="drawer" id="drawer">
+    <div class="drawer-top">
+      <span class="drawer-logo">Flo</span>
+      <button class="drawer-close" id="drawer-close">×</button>
+    </div>
+    <ul class="drawer-nav">
+      <li class="nav-item active" data-view="aufgaben"><span class="nav-ico">✓</span>Aufgaben</li>
+      <li class="nav-item" data-view="notizen"><span class="nav-ico">✎</span>Notizen</li>
+      <li class="nav-item" data-view="kalender"><span class="nav-ico">▦</span>Kalender</li>
+      <li class="nav-item" data-view="gewohnheiten"><span class="nav-ico">◴</span>Routinen</li>
+      <li class="nav-divider"></li>
+      <li class="nav-item" data-view="kalorien"><span class="nav-ico">◈</span>Kalorien & Protein</li>
+      <li class="nav-item" data-view="zyklus"><span class="nav-ico">◎</span>Zyklus & Pille</li>
+      <li class="nav-item" data-view="bibel"><span class="nav-ico">✦</span>Bibeltagebuch</li>
+      <li class="nav-item" data-view="training"><span class="nav-ico">▷</span>Trainingsplan</li>
+    </ul>
+  </nav>
+
   <header class="app-header">
+    <button class="hamburger" id="menu-btn" aria-label="Menü">
+      <span></span><span></span><span></span>
+    </button>
     <h1 id="view-title">Aufgaben</h1>
     <span id="today-label" class="today-label"></span>
   </header>
 
   <main id="main">
+
     <!-- Aufgaben -->
     <section class="view" data-view="aufgaben">
       <form id="task-form" class="add-form">
         <input id="task-input" type="text" placeholder="Neue Aufgabe…" autocomplete="off" />
-        <button type="submit" aria-label="Hinzufügen">+</button>
+        <button type="submit">+</button>
       </form>
       <ul id="task-list" class="list"></ul>
-      <p id="task-empty" class="empty">Noch nichts zu tun. Genieß den Moment. 🌿</p>
+      <p id="task-empty" class="empty">Noch nichts zu tun. Genieß den Moment.</p>
     </section>
 
     <!-- Notizen -->
     <section class="view" data-view="notizen" hidden>
       <form id="note-form" class="add-form">
         <input id="note-input" type="text" placeholder="Schnelle Notiz…" autocomplete="off" />
-        <button type="submit" aria-label="Hinzufügen">+</button>
+        <button type="submit">+</button>
       </form>
       <ul id="note-list" class="list"></ul>
-      <p id="note-empty" class="empty">Kopf leer, Liste leer. ✍️</p>
+      <p id="note-empty" class="empty">Kopf leer, Liste leer.</p>
     </section>
 
     <!-- Kalender -->
@@ -48,31 +73,128 @@
         <div class="row">
           <input id="event-date" type="date" />
           <input id="event-time" type="time" />
-          <button type="submit" aria-label="Hinzufügen">+</button>
+          <button type="submit">+</button>
         </div>
       </form>
       <ul id="event-list" class="list"></ul>
-      <p id="event-empty" class="empty">Keine Termine. Frei wie ein Vogel. 🕊️</p>
+      <p id="event-empty" class="empty">Keine Termine. Frei wie ein Vogel.</p>
     </section>
 
-    <!-- Gewohnheiten -->
+    <!-- Routinen -->
     <section class="view" data-view="gewohnheiten" hidden>
       <form id="habit-form" class="add-form">
         <input id="habit-input" type="text" placeholder="Neue Gewohnheit…" autocomplete="off" />
-        <button type="submit" aria-label="Hinzufügen">+</button>
+        <button type="submit">+</button>
       </form>
       <ul id="habit-list" class="list"></ul>
-      <p id="habit-empty" class="empty">Welche Routine willst du aufbauen? 💪</p>
+      <p id="habit-empty" class="empty">Welche Routine willst du aufbauen?</p>
     </section>
+
+    <!-- Kalorien & Protein -->
+    <section class="view" data-view="kalorien" hidden>
+      <div class="macro-card">
+        <div class="macro-bar">
+          <div class="macro-label">
+            <span>Kalorien</span>
+            <span><span id="kcal-total">0</span> / <span id="kcal-goal">2000</span> kcal</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="kcal-bar"></div></div>
+        </div>
+        <div class="macro-bar">
+          <div class="macro-label">
+            <span>Protein</span>
+            <span><span id="prot-total">0</span> / <span id="prot-goal">150</span> g</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill protein" id="prot-bar"></div></div>
+        </div>
+        <button class="ghost-btn" id="goal-btn">Ziele anpassen</button>
+      </div>
+      <form id="meal-form" class="add-form column">
+        <input id="meal-input" type="text" placeholder="Mahlzeit…" autocomplete="off" />
+        <div class="row">
+          <input id="meal-kcal" type="number" placeholder="kcal" min="0" />
+          <input id="meal-prot" type="number" placeholder="Protein g" min="0" />
+          <button type="submit">+</button>
+        </div>
+      </form>
+      <ul id="meal-list" class="list"></ul>
+      <p id="meal-empty" class="empty">Noch nichts eingetragen heute.</p>
+    </section>
+
+    <!-- Zyklus & Pille -->
+    <section class="view" data-view="zyklus" hidden>
+      <div id="zyklus-setup" hidden>
+        <div class="setup-card">
+          <p class="setup-title">Wann begann deine letzte Periode?</p>
+          <div class="row" style="gap:8px">
+            <input id="period-start" type="date" style="flex:1" />
+            <input id="cycle-length-input" type="number" value="28" min="20" max="45"
+              placeholder="Tage" style="width:72px" />
+            <button id="setup-save-btn" class="accent-btn">OK</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="zyklus-display" hidden>
+        <div class="phase-card" id="phase-card">
+          <div class="phase-day" id="phase-day">Tag —</div>
+          <div class="phase-name" id="phase-name">—</div>
+          <div class="phase-desc" id="phase-desc"></div>
+        </div>
+        <div class="pill-reminder" id="pill-reminder">
+          <div class="pill-icon">💊</div>
+          <div class="pill-info">
+            <div class="pill-title">Pille</div>
+            <div class="pill-time">täglich 19:00 Uhr</div>
+          </div>
+          <button class="pill-btn" id="pill-btn">Genommen ✓</button>
+        </div>
+        <button class="ghost-btn" id="zyklus-edit-btn" style="margin-bottom:20px">Datum ändern</button>
+      </div>
+
+      <div class="phase-guide">
+        <h3 class="guide-title">Deine Zyklusphasen</h3>
+        <div class="phase-row"><div class="phase-dot" style="background:#C07A7A"></div><div><strong>Menstruation</strong> (Tag 1–5) — Ruhe, Wärme, sanfte Bewegung</div></div>
+        <div class="phase-row"><div class="phase-dot" style="background:#7A9E87"></div><div><strong>Follikelphase</strong> (Tag 6–13) — Energie steigt, neue Projekte starten</div></div>
+        <div class="phase-row"><div class="phase-dot" style="background:#C9897A"></div><div><strong>Eisprung</strong> (Tag 14–16) — Höchste Energie, du strahlst</div></div>
+        <div class="phase-row"><div class="phase-dot" style="background:#9B8579"></div><div><strong>Lutealphase</strong> (Tag 17–28) — Innehalten, auf dich hören</div></div>
+      </div>
+    </section>
+
+    <!-- Bibeltagebuch -->
+    <section class="view" data-view="bibel" hidden>
+      <details class="guide-box">
+        <summary class="guide-summary">Wie fange ich an? ✦</summary>
+        <div class="guide-content">
+          <p>Das Bibeltagebuch begleitet dich täglich. So kannst du starten:</p>
+          <ol>
+            <li><strong>Wähle eine Bibelstelle</strong> — ein Vers der dich heute anspricht. Tipp: die App YouVersion (Bible) hat einen Tagesvers.</li>
+            <li><strong>Lies ihn langsam</strong> — 2–3 Mal. Was fällt dir auf? Was berührt dich?</li>
+            <li><strong>Schreib deine Gedanken</strong> — keine Perfektion nötig, sei ehrlich.</li>
+            <li><strong>Schreib ein kurzes Gebet</strong> — was möchtest du Gott sagen oder fragen?</li>
+          </ol>
+          <p><em>Schon 5 Minuten täglich können etwas verändern.</em></p>
+        </div>
+      </details>
+      <form id="bibel-form" class="bibel-form">
+        <input id="bibel-stelle" type="text" placeholder="Bibelstelle (z.B. Psalm 23,1)" autocomplete="off" />
+        <textarea id="bibel-vers" placeholder="Vers oder Zitat…" rows="2"></textarea>
+        <textarea id="bibel-gedanken" placeholder="Meine Gedanken dazu…" rows="3"></textarea>
+        <textarea id="bibel-gebet" placeholder="Mein Gebet / mein Wunsch…" rows="2"></textarea>
+        <button type="submit" class="full-btn">Eintrag speichern</button>
+      </form>
+      <ul id="bibel-list" class="list bibel-list"></ul>
+      <p id="bibel-empty" class="empty">Noch kein Eintrag. Fang heute an.</p>
+    </section>
+
+    <!-- Trainingsplan -->
+    <section class="view" data-view="training" hidden>
+      <p class="section-intro">Tippe auf einen Monat um deinen Plan einzutragen.</p>
+      <div id="training-months" class="month-grid"></div>
+    </section>
+
   </main>
 
-  <nav class="tabbar">
-    <button class="tab active" data-tab="aufgaben"><span class="ico">✓</span>Aufgaben</button>
-    <button class="tab" data-tab="notizen"><span class="ico">✎</span>Notizen</button>
-    <button class="tab" data-tab="kalender"><span class="ico">▦</span>Kalender</button>
-    <button class="tab" data-tab="gewohnheiten"><span class="ico">◴</span>Routinen</button>
-  </nav>
-
-  <script src="app.js"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
