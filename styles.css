@@ -447,6 +447,28 @@ main { padding: 22px 20px 0; max-width: 600px; margin: 0 auto; }
 .bibel-entry-vers { font-style: italic; font-size: 15px; color: var(--muted); line-height: 1.5; margin-bottom: 4px; }
 .bibel-entry-text { font-size: 16px; line-height: 1.5; }
 
+/* ── Listen ── */
+.listen-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
+}
+.listen-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 18px 16px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.12s;
+}
+.listen-card:active { border-color: var(--accent); }
+.listen-card-name { font-family: var(--serif); font-size: 18px; margin-bottom: 6px; }
+.listen-card-count { font-size: 13px; color: var(--muted); font-style: italic; }
+
+.sheet-full {
+  max-height: 92vh !important; height: 92vh;
+  display: flex; flex-direction: column;
+}
+.sheet-title-row {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
 /* ── Trainingsplan ── */
 .section-intro { font-size: 15px; color: var(--muted); font-style: italic; margin-bottom: 16px; }
 

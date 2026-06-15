@@ -43,7 +43,7 @@ overlay.addEventListener("click", closeDrawer);
 
 const VIEW_TITLES = {
   aufgaben: "Aufgaben",
-  notizen: "Notizen",
+  listen: "Listen",
   kalender: "Kalender",
   gewohnheiten: "Routinen",
   kalorien: "Kalorien & Wasser",
@@ -101,33 +101,127 @@ $("#task-form").addEventListener("submit", (e) => {
 });
 renderTasks();
 
-// ---------- Notizen ----------
-let notes = store.get("notes", []);
-const noteList = $("#note-list");
-
-function renderNotes() {
-  noteList.innerHTML = "";
-  notes.forEach((n) => {
-    const li = document.createElement("li");
-    li.className = "item";
-    li.innerHTML = `<div class="item-body"><div class="item-title"></div></div><button class="del">×</button>`;
-    li.querySelector(".item-title").textContent = n.text;
-    li.querySelector(".del").onclick = () => { notes = notes.filter((x) => x.id !== n.id); store.set("notes", notes); renderNotes(); };
-    noteList.appendChild(li);
+// ---------- Listen ----------
+function renderListen() {
+  const lists = store.get("listen", []);
+  const grid = $("#listen-grid");
+  grid.innerHTML = "";
+  lists.forEach((l) => {
+    const card = document.createElement("div");
+    card.className = "listen-card";
+    const done = l.items.filter(i => i.done).length;
+    card.innerHTML = `
+      <div class="listen-card-name"></div>
+      <div class="listen-card-count"></div>`;
+    card.querySelector(".listen-card-name").textContent = l.name;
+    card.querySelector(".listen-card-count").textContent = l.items.length === 0 ? "Leer" : `${done}/${l.items.length}`;
+    card.onclick = () => openListSheet(l.id);
+    grid.appendChild(card);
   });
-  $("#note-empty").hidden = notes.length > 0;
+  $("#listen-empty").hidden = lists.length > 0;
 }
-$("#note-form").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const input = $("#note-input");
-  const text = input.value.trim();
-  if (!text) return;
-  notes.unshift({ id: uid(), text });
-  store.set("notes", notes);
-  input.value = "";
-  renderNotes();
+
+function openListSheet(listId) {
+  const lists = store.get("listen", []);
+  const list = lists.find(l => l.id === listId);
+  if (!list) return;
+
+  const sheet = document.createElement("div");
+  sheet.className = "sheet-overlay";
+  sheet.innerHTML = `
+    <div class="sheet sheet-full">
+      <div class="sheet-header">
+        <div class="sheet-title-row">
+          <div class="sheet-title listen-sheet-title"></div>
+          <button class="del listen-del-btn">×</button>
+        </div>
+      </div>
+      <form class="add-form listen-add-form">
+        <input type="text" placeholder="Neuer Eintrag…" autocomplete="off"/>
+        <button type="submit">+</button>
+      </form>
+      <ul class="list listen-items"></ul>
+      <div class="sheet-actions" style="margin-top:auto;padding-top:16px">
+        <button class="sheet-cancel" style="flex:1">Schließen</button>
+      </div>
+    </div>`;
+
+  sheet.querySelector(".listen-sheet-title").textContent = list.name;
+  sheet.querySelector(".sheet-cancel").onclick = () => { document.body.removeChild(sheet); renderListen(); };
+
+  sheet.querySelector(".listen-del-btn").onclick = () => {
+    if (!confirm("Liste löschen?")) return;
+    const updated = store.get("listen", []).filter(l => l.id !== listId);
+    store.set("listen", updated);
+    document.body.removeChild(sheet);
+    renderListen();
+  };
+
+  function renderItems() {
+    const ul = sheet.querySelector(".listen-items");
+    ul.innerHTML = "";
+    const cur = store.get("listen", []).find(l => l.id === listId);
+    if (!cur) return;
+    cur.items.forEach(item => {
+      const li = document.createElement("li");
+      li.className = "item" + (item.done ? " done" : "");
+      li.innerHTML = `<div class="check ${item.done ? "done" : ""}">✓</div><div class="item-body"><div class="item-title"></div></div><button class="del">×</button>`;
+      li.querySelector(".item-title").textContent = item.text;
+      li.querySelector(".check").onclick = () => {
+        const ls = store.get("listen", []); const l2 = ls.find(l => l.id === listId);
+        const it = l2.items.find(i => i.id === item.id); it.done = !it.done;
+        store.set("listen", ls); renderItems();
+      };
+      li.querySelector(".del").onclick = () => {
+        const ls = store.get("listen", []); const l2 = ls.find(l => l.id === listId);
+        l2.items = l2.items.filter(i => i.id !== item.id);
+        store.set("listen", ls); renderItems();
+      };
+      ul.appendChild(li);
+    });
+  }
+  renderItems();
+
+  sheet.querySelector(".listen-add-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = sheet.querySelector("input");
+    const text = input.value.trim(); if (!text) return;
+    const ls = store.get("listen", []); const l2 = ls.find(l => l.id === listId);
+    l2.items.push({ id: uid(), text, done: false });
+    store.set("listen", ls); input.value = ""; renderItems();
+  });
+
+  document.body.appendChild(sheet);
+  setTimeout(() => sheet.querySelector("input").focus(), 50);
+}
+
+$("#neue-liste-btn").addEventListener("click", () => {
+  const sheet = document.createElement("div");
+  sheet.className = "sheet-overlay";
+  sheet.innerHTML = `
+    <div class="sheet">
+      <div class="sheet-title">Neue Liste</div>
+      <input type="text" placeholder="Name der Liste…" autocomplete="off"/>
+      <div class="sheet-actions" style="margin-top:16px">
+        <button class="sheet-cancel">Abbrechen</button>
+        <button class="accent-btn sheet-save">Erstellen</button>
+      </div>
+    </div>`;
+  sheet.querySelector(".sheet-cancel").onclick = () => document.body.removeChild(sheet);
+  sheet.querySelector(".sheet-save").onclick = () => {
+    const name = sheet.querySelector("input").value.trim();
+    if (!name) return;
+    const lists = store.get("listen", []);
+    lists.push({ id: uid(), name, items: [] });
+    store.set("listen", lists);
+    document.body.removeChild(sheet);
+    renderListen();
+  };
+  document.body.appendChild(sheet);
+  setTimeout(() => sheet.querySelector("input").focus(), 50);
 });
-renderNotes();
+
+renderListen();
 
 // ---------- Kalender ----------
 let events = store.get("events", []);
