@@ -598,7 +598,7 @@ main { padding: 22px 20px 0; max-width: 600px; margin: 0 auto; }
 .phase-info-btn {
   background: var(--surface-2); border: 1.5px solid var(--border);
   border-radius: 50%; width: 36px; height: 36px;
-  font-size: 16px; color: var(--muted); cursor: pointer;
+  font-size: 17px; font-family: var(--serif); font-style: italic; font-weight: 600; color: var(--muted); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; -webkit-tap-highlight-color: transparent;
 }
