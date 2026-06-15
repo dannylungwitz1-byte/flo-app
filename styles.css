@@ -529,3 +529,85 @@ main { padding: 22px 20px 0; max-width: 600px; margin: 0 auto; }
 .sheet-goal-row { display: flex; gap: 10px; }
 .sheet-goal-row input { flex: 1; }
 .sheet-goal-label { font-size: 15px; color: var(--muted); margin-bottom: 6px; }
+
+/* ── Wasserzähler ── */
+.water-section {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+}
+.water-drop-wrap { position: relative; margin-bottom: 8px; }
+.water-number {
+  position: absolute; bottom: 18px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--serif); font-size: 28px;
+  color: var(--text); line-height: 1;
+  white-space: nowrap;
+}
+.water-denom { font-size: 16px; color: var(--muted); }
+.water-label { font-size: 14px; color: var(--muted); font-style: italic; margin-bottom: 14px; }
+.water-controls { display: flex; gap: 10px; }
+.water-btn {
+  border: none; border-radius: 20px;
+  padding: 10px 18px; font-family: var(--body); font-size: 18px;
+  cursor: pointer; font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+}
+.water-minus { background: var(--surface-2); color: var(--muted); }
+.water-plus  { background: #5A9BB8; color: #fff; font-size: 15px; font-weight: 400; }
+.water-ghost { background: none; border: 1.5px solid var(--border); color: var(--muted); font-size: 14px; font-weight: 400; }
+
+/* ── Gespeicherte Mahlzeiten ── */
+.chips-title { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.chips-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.meal-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 20px; cursor: pointer; font-size: 14px;
+  font-family: var(--body); color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+.meal-chip:active { border-color: var(--accent); }
+.meal-chip-del {
+  background: none; border: none; color: var(--muted);
+  font-size: 16px; cursor: pointer; padding: 0; line-height: 1;
+}
+.meal-save-btn {
+  background: none; border: none; color: var(--muted);
+  font-size: 16px; cursor: pointer; padding: 0 2px;
+  transition: color 0.12s;
+}
+.meal-save-btn:active { color: var(--accent); }
+
+/* ── Phasen-Info-Bar ── */
+.phase-today-bar {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.phase-today-day { font-size: 12px; color: var(--muted); font-style: italic; margin-bottom: 2px; }
+.phase-today-name { font-family: var(--serif); font-size: 20px; margin-bottom: 2px; }
+.phase-today-short { font-size: 14px; color: var(--muted); }
+.phase-info-btn {
+  background: var(--surface-2); border: 1.5px solid var(--border);
+  border-radius: 50%; width: 36px; height: 36px;
+  font-size: 16px; color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; -webkit-tap-highlight-color: transparent;
+}
+.phase-sheet-name { font-family: var(--serif); font-size: 24px; margin-bottom: 4px; }
+.phase-sheet-days { font-size: 14px; color: var(--muted); font-style: italic; margin-bottom: 16px; }
+.phase-sheet-text { font-size: 16px; line-height: 1.65; color: var(--text); margin-bottom: 16px; }
+.phase-tips { display: flex; flex-wrap: wrap; gap: 8px; }
+.phase-tip {
+  padding: 7px 12px; border-radius: 20px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  font-size: 14px; color: var(--muted);
+}

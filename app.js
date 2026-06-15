@@ -10,7 +10,12 @@ const store = {
 
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const $ = (sel) => document.querySelector(sel);
-const dateKey = (d = new Date()) => d.toISOString().slice(0, 10);
+const dateKey = (d = new Date()) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
 const TODAY = dateKey();
 
 // ---------- Datum-Anzeige ----------
@@ -236,6 +241,34 @@ let macroGoals = store.get("macroGoals", { kcal: 2000, prot: 150 });
 function getTodayMeals() { return store.get("meals-" + TODAY, []); }
 function saveTodayMeals(meals) { store.set("meals-" + TODAY, meals); }
 
+function getSavedMeals() { return store.get("saved-meals", []); }
+
+function renderSavedChips() {
+  const saved = getSavedMeals();
+  const wrap = $("#saved-chips-wrap");
+  const container = $("#saved-chips");
+  wrap.hidden = saved.length === 0;
+  container.innerHTML = "";
+  saved.forEach((m) => {
+    const chip = document.createElement("div");
+    chip.className = "meal-chip";
+    chip.innerHTML = `<span></span><span style="color:var(--muted);font-size:13px">${m.kcal} kcal</span><button class="meal-chip-del">×</button>`;
+    chip.querySelector("span").textContent = m.name;
+    chip.onclick = (e) => {
+      if (e.target.classList.contains("meal-chip-del")) return;
+      $("#meal-input").value = m.name;
+      $("#meal-kcal").value = m.kcal;
+      $("#meal-prot").value = m.prot;
+      $("#meal-input").focus();
+    };
+    chip.querySelector(".meal-chip-del").onclick = () => {
+      store.set("saved-meals", getSavedMeals().filter((x) => x.id !== m.id));
+      renderSavedChips();
+    };
+    container.appendChild(chip);
+  });
+}
+
 function renderMacros() {
   const meals = getTodayMeals();
   const totalKcal = meals.reduce((s, m) => s + (m.kcal || 0), 0);
@@ -259,16 +292,26 @@ function renderMacros() {
         <div class="item-title"></div>
         <div class="item-sub">${m.kcal} kcal · ${m.prot} g Protein</div>
       </div>
+      <button class="meal-save-btn" title="Als Favorit speichern">☆</button>
       <button class="del">×</button>`;
     li.querySelector(".item-title").textContent = m.name;
+    li.querySelector(".meal-save-btn").onclick = () => {
+      const saved = getSavedMeals();
+      if (!saved.find((x) => x.name === m.name)) {
+        saved.push({ id: uid(), name: m.name, kcal: m.kcal, prot: m.prot });
+        store.set("saved-meals", saved);
+        renderSavedChips();
+      }
+    };
     li.querySelector(".del").onclick = () => {
-      const updated = getTodayMeals().filter((x) => x.id !== m.id);
-      saveTodayMeals(updated);
+      saveTodayMeals(getTodayMeals().filter((x) => x.id !== m.id));
       renderMacros();
     };
     list.appendChild(li);
   });
   $("#meal-empty").hidden = meals.length > 0;
+  renderWater();
+  renderSavedChips();
 }
 
 $("#meal-form").addEventListener("submit", (e) => {
@@ -310,13 +353,60 @@ $("#goal-btn").addEventListener("click", () => {
   document.body.appendChild(sheet);
 });
 
+// ---------- Wasserzähler ----------
+function renderWater() {
+  const goal = store.get("waterGoal", 8);
+  const count = store.get("water-" + TODAY, 0);
+  const fraction = Math.min(1, count / goal);
+  const translateY = Math.round((1 - fraction) * 148);
+  const rect = $("#water-fill-rect");
+  if (rect) rect.style.transform = `translateY(${translateY}px)`;
+  const wc = $("#water-count");
+  if (wc) wc.textContent = count;
+  const wg = $("#water-goal-disp");
+  if (wg) wg.textContent = goal;
+}
+
+$("#water-plus").addEventListener("click", () => {
+  const goal = store.get("waterGoal", 8);
+  const cur = store.get("water-" + TODAY, 0);
+  if (cur < goal) { store.set("water-" + TODAY, cur + 1); renderWater(); }
+});
+$("#water-minus").addEventListener("click", () => {
+  const cur = store.get("water-" + TODAY, 0);
+  if (cur > 0) { store.set("water-" + TODAY, cur - 1); renderWater(); }
+});
+$("#water-goal-btn").addEventListener("click", () => {
+  const goal = store.get("waterGoal", 8);
+  const sheet = document.createElement("div");
+  sheet.className = "sheet-overlay";
+  sheet.innerHTML = `
+    <div class="sheet">
+      <div class="sheet-title">Tagesziel Wasser</div>
+      <p class="sheet-goal-label">Anzahl Gläser</p>
+      <input type="number" id="w-goal" value="${goal}" min="1" max="20"/>
+      <div class="sheet-actions">
+        <button class="sheet-cancel">Abbrechen</button>
+        <button class="accent-btn sheet-save">Speichern</button>
+      </div>
+    </div>`;
+  sheet.querySelector(".sheet-cancel").onclick = () => document.body.removeChild(sheet);
+  sheet.querySelector(".sheet-save").onclick = () => {
+    store.set("waterGoal", parseInt(sheet.querySelector("#w-goal").value) || 8);
+    document.body.removeChild(sheet);
+    renderWater();
+  };
+  document.body.appendChild(sheet);
+});
+renderWater();
+
 // ---------- Zyklus & Pille ----------
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth();
 
 function getDayInCycle(dateStr, data) {
-  const start = new Date(data.start);
-  start.setHours(0, 0, 0, 0);
+  // Parse both as local midnight to avoid UTC timezone shifts
+  const start = new Date(data.start + "T00:00:00");
   const d = new Date(dateStr + "T00:00:00");
   const diff = Math.floor((d - start) / 86400000);
   if (diff < 0) return null;
@@ -367,6 +457,24 @@ function buildCalDay(dateStr, data, pillDays, otherMonth) {
   return cell;
 }
 
+const PHASE_INFO = {
+  mens:     { name: "Menstruation",  days: "Tag 1–5",   short: "Ruhe & Regeneration",
+    text: "Die Gebärmutterschleimhaut löst sich ab. Östrogen und Progesteron sind auf ihrem Tiefstand. Viele Frauen fühlen sich müde und empfindlich — das ist völlig normal. Gönne dir Wärme und Ruhe.",
+    tips: ["Wärme & Wärmflasche", "Sanftes Yoga", "Eisenreich essen", "Früh schlafen"] },
+  follikel: { name: "Follikelphase", days: "Tag 6–13",  short: "Energie steigt",
+    text: "Östrogen steigt an. Du wirst energie­reicher, kommunikativer und kreativer. Dein Körper bereitet sich auf den Eisprung vor — jetzt ist der beste Zeitpunkt für neue Projekte und intensiveren Sport.",
+    tips: ["Neue Projekte starten", "Krafttraining optimal", "Soziale Events", "Kreativität nutzen"] },
+  eisprung: { name: "Eisprung",      days: "Tag 14–16", short: "Höchste Energie",
+    text: "Östrogen erreicht seinen Höhepunkt. Du strahlst Selbstbewusstsein aus, bist kommunikativ und energiegeladen. Ein perfekter Moment für wichtige Gespräche, Präsentationen oder besondere Aktivitäten.",
+    tips: ["Wichtige Gespräche", "Höchstleistung Sport", "Selbstbewusst auftreten", "Fruchtbarste Zeit"] },
+  luteal:   { name: "Lutealphase",   days: "Tag 17–28", short: "Nach innen kehren",
+    text: "Progesteron steigt an, du wirst ruhiger und introvertierter. In der zweiten Hälfte können PMS-Symptome auftreten. Dein Körper signalisiert: Verlangsamen, reflektieren und auf sich achten.",
+    tips: ["Reflexion & Journaling", "Ruhige Routinen", "Magnesium & B6", "Auf sich hören"] },
+  pause:    { name: "Pillenpause",   days: "Pause",     short: "Pillenfreie Tage",
+    text: "Das sind deine pillenfreien Tage. Es kommt zu einer Abbruchblutung, die durch den Hormonentzug ausgelöst wird. Gönn dir Ruhe und achte auf deinen Körper.",
+    tips: ["Wärme & Ruhe", "Viel trinken", "Sanfte Bewegung", "Auf Beschwerden achten"] },
+};
+
 function renderZyklus() {
   const data = store.get("zyklus", null);
   const setupEl = $("#zyklus-setup");
@@ -413,6 +521,20 @@ function renderZyklus() {
     const d = new Date(calYear, calMonth + 1, i);
     grid.appendChild(buildCalDay(dateKey(d), data, pillDays, true));
   }
+
+  // Heutige Phase anzeigen
+  const todayDIC = getDayInCycle(TODAY, data);
+  const phaseTodayBar = $("#phase-today-bar");
+  if (todayDIC !== null) {
+    phaseTodayBar.hidden = false;
+    const pKey = phaseClass(todayDIC, pillDays).replace("phase-", "") || "luteal";
+    const info = PHASE_INFO[pKey] || PHASE_INFO.luteal;
+    $("#phase-today-day").textContent = "Tag " + todayDIC + " von " + (data.length || 28);
+    $("#phase-today-name").textContent = info.name;
+    $("#phase-today-short").textContent = info.short;
+  } else {
+    phaseTodayBar.hidden = true;
+  }
 }
 
 $("#setup-save-btn").addEventListener("click", () => {
@@ -431,6 +553,39 @@ $("#cal-prev").addEventListener("click", () => {
 $("#cal-next").addEventListener("click", () => {
   calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
   renderZyklus();
+});
+
+$("#phase-info-btn").addEventListener("click", () => {
+  const data = store.get("zyklus", null);
+  if (!data) return;
+  const pillDays = data.pillDays || 21;
+  const todayDIC = getDayInCycle(TODAY, data);
+  if (todayDIC === null) return;
+  const pKey = phaseClass(todayDIC, pillDays).replace("phase-", "") || "luteal";
+  const info = PHASE_INFO[pKey] || PHASE_INFO.luteal;
+  const sheet = document.createElement("div");
+  sheet.className = "sheet-overlay";
+  sheet.innerHTML = `
+    <div class="sheet">
+      <div class="phase-sheet-name"></div>
+      <div class="phase-sheet-days"></div>
+      <div class="phase-sheet-text"></div>
+      <div class="phase-tips"></div>
+      <div class="sheet-actions" style="margin-top:20px">
+        <button class="sheet-cancel" style="flex:1">Schließen</button>
+      </div>
+    </div>`;
+  sheet.querySelector(".phase-sheet-name").textContent = info.name;
+  sheet.querySelector(".phase-sheet-days").textContent = info.days;
+  sheet.querySelector(".phase-sheet-text").textContent = info.text;
+  info.tips.forEach((t) => {
+    const tip = document.createElement("div");
+    tip.className = "phase-tip";
+    tip.textContent = t;
+    sheet.querySelector(".phase-tips").appendChild(tip);
+  });
+  sheet.querySelector(".sheet-cancel").onclick = () => document.body.removeChild(sheet);
+  document.body.appendChild(sheet);
 });
 
 $("#zyklus-edit-btn").addEventListener("click", () => {
@@ -561,7 +716,9 @@ function openDaySheet(week, dayNum, dayName, key) {
         <button class="accent-btn sheet-save">Speichern</button>
       </div>
     </div>`;
-  sheet.querySelector("textarea").value = plan;
+  const w1Key = "training-w1-d" + dayNum;
+  const w1Plan = week > 1 && !plan ? store.get(w1Key, "") : "";
+  sheet.querySelector("textarea").value = plan || w1Plan;
   sheet.querySelector(".sheet-cancel").onclick = () => document.body.removeChild(sheet);
   sheet.querySelector(".sheet-save").onclick = () => {
     store.set(key, sheet.querySelector("textarea").value.trim());

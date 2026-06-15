@@ -109,6 +109,42 @@
         </div>
         <button class="ghost-btn" id="goal-btn">Ziele anpassen</button>
       </div>
+
+      <!-- Wasserzähler -->
+      <div class="water-section">
+        <div class="water-drop-wrap">
+          <svg id="water-svg" viewBox="0 0 120 160" width="84" height="112">
+            <defs>
+              <clipPath id="drop-clip">
+                <path d="M60,6 C60,6 14,72 14,106 C14,134 35,154 60,154 C85,154 106,134 106,106 C106,72 60,6 60,6 Z"/>
+              </clipPath>
+            </defs>
+            <path d="M60,6 C60,6 14,72 14,106 C14,134 35,154 60,154 C85,154 106,134 106,106 C106,72 60,6 60,6 Z" fill="#EDF6FA"/>
+            <g clip-path="url(#drop-clip)">
+              <rect id="water-fill-rect" x="0" y="6" width="120" height="148" fill="#7AB8D4" opacity="0.72"
+                style="transform:translateY(148px);transition:transform 0.5s cubic-bezier(0.4,0,0.2,1)"/>
+              <ellipse cx="44" cy="60" rx="8" ry="13" fill="white" opacity="0.22"/>
+              <ellipse cx="72" cy="110" rx="5" ry="8" fill="white" opacity="0.15"/>
+            </g>
+            <path d="M60,6 C60,6 14,72 14,106 C14,134 35,154 60,154 C85,154 106,134 106,106 C106,72 60,6 60,6 Z"
+              fill="none" stroke="#5A9BB8" stroke-width="2.5"/>
+          </svg>
+          <div class="water-number"><span id="water-count">0</span><span class="water-denom">/<span id="water-goal-disp">8</span></span></div>
+        </div>
+        <div class="water-label">Gläser Wasser heute</div>
+        <div class="water-controls">
+          <button class="water-btn water-minus" id="water-minus">−</button>
+          <button class="water-btn water-plus" id="water-plus">+ Glas</button>
+          <button class="water-btn water-ghost" id="water-goal-btn">Ziel</button>
+        </div>
+      </div>
+
+      <!-- Gespeicherte Mahlzeiten -->
+      <div id="saved-chips-wrap" hidden>
+        <div class="chips-title">Schnell hinzufügen</div>
+        <div id="saved-chips" class="chips-row"></div>
+      </div>
+
       <form id="meal-form" class="add-form column">
         <input id="meal-input" type="text" placeholder="Mahlzeit…" autocomplete="off" />
         <div class="row">
@@ -127,7 +163,7 @@
       <div id="zyklus-setup" hidden>
         <div class="setup-card">
           <p class="setup-title">Zyklus einrichten</p>
-          <label class="setup-label">Erster Tag deiner letzten Periode</label>
+          <label class="setup-label">Wann hast du zuletzt deine erste Pille genommen?</label>
           <input id="period-start" type="date" style="width:100%;margin-bottom:14px" />
           <div class="row" style="gap:10px;margin-bottom:16px">
             <div style="flex:1">
@@ -139,7 +175,7 @@
               <input id="pill-days-input" type="number" value="21" min="1" max="40" style="width:100%" />
             </div>
           </div>
-          <p class="setup-hint">z.B. 21 Pillen + 7 Tage Pause = 28 Tage Zyklus</p>
+          <p class="setup-hint">z.B. 21 Pille-Tage + 7 Pause = 28 Tage. Tag 1 = erster Pille-Tag nach der Pause.</p>
           <button id="setup-save-btn" class="full-btn" style="margin-top:14px">Speichern</button>
         </div>
       </div>
@@ -154,6 +190,17 @@
           <span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span>
         </div>
         <div id="cal-grid" class="cal-grid"></div>
+
+        <!-- Heutige Phase -->
+        <div id="phase-today-bar" class="phase-today-bar" hidden>
+          <div class="phase-today-left">
+            <div class="phase-today-day" id="phase-today-day"></div>
+            <div class="phase-today-name" id="phase-today-name"></div>
+            <div class="phase-today-short" id="phase-today-short"></div>
+          </div>
+          <button class="phase-info-btn" id="phase-info-btn">ℹ</button>
+        </div>
+
         <div class="cal-legend">
           <div class="legend-item"><div class="legend-swatch" style="background:#F2DADA"></div>Mens.</div>
           <div class="legend-item"><div class="legend-swatch" style="background:#D4EADB"></div>Follikel</div>
