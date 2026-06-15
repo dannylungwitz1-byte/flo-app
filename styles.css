@@ -541,14 +541,14 @@ main { padding: 22px 20px 0; max-width: 600px; margin: 0 auto; }
 }
 .water-drop-wrap { position: relative; margin-bottom: 8px; }
 .water-number {
-  position: absolute; bottom: 18px; left: 50%;
+  position: absolute; bottom: 16px; left: 50%;
   transform: translateX(-50%);
-  font-family: var(--serif); font-size: 28px;
+  font-family: var(--serif); font-size: 22px;
   color: var(--text); line-height: 1;
   white-space: nowrap;
 }
-.water-denom { font-size: 16px; color: var(--muted); }
-.water-label { font-size: 14px; color: var(--muted); font-style: italic; margin-bottom: 14px; }
+.water-denom { display: none; }
+.water-label { font-size: 13px; color: var(--muted); font-style: italic; margin-bottom: 14px; margin-top: 4px; }
 .water-controls { display: flex; gap: 10px; }
 .water-btn {
   border: none; border-radius: 20px;

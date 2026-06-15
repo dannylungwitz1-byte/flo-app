@@ -365,7 +365,7 @@ function renderWater() {
   const wc = $("#water-count");
   if (wc) wc.textContent = (drunkMl / 1000).toFixed(1).replace(".", ",") + " L";
   const wg = $("#water-goal-disp");
-  if (wg) wg.textContent = (goalMl / 1000).toFixed(1).replace(".", ",") + " L";
+  if (wg) wg.textContent = "Ziel: " + (goalMl / 1000).toFixed(1).replace(".", ",") + " L";
 }
 
 $("#water-plus").addEventListener("click", () => {
