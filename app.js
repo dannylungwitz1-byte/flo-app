@@ -46,7 +46,7 @@ const VIEW_TITLES = {
   notizen: "Notizen",
   kalender: "Kalender",
   gewohnheiten: "Routinen",
-  kalorien: "Kalorien & Protein",
+  kalorien: "Kalorien & Wasser",
   zyklus: "Zyklus & Pille",
   bibel: "Bibeltagebuch",
   training: "Trainingsplan",
