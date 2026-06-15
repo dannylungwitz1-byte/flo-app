@@ -543,8 +543,8 @@ main { padding: 22px 20px 0; max-width: 600px; margin: 0 auto; }
 .water-number {
   position: absolute; bottom: 16px; left: 50%;
   transform: translateX(-50%);
-  font-family: var(--serif); font-size: 22px;
-  color: var(--text); line-height: 1;
+  font-family: var(--serif); font-size: 16px;
+  color: var(--muted); line-height: 1;
   white-space: nowrap;
 }
 .water-denom { display: none; }

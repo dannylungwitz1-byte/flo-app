@@ -61,7 +61,6 @@ function navigateTo(view) {
   closeDrawer();
   if (view === "kalorien") renderMacros();
   if (view === "zyklus") renderZyklus();
-  if (view === "bibel") renderBibel();
   if (view === "training") renderTraining();
 }
 
@@ -605,72 +604,6 @@ $("#zyklus-edit-btn").addEventListener("click", () => {
   $("#zyklus-setup").hidden = false;
   $("#zyklus-display").hidden = true;
 });
-
-// Pillenerinnerung um 19:00
-if ("Notification" in window && Notification.permission === "default") {
-  Notification.requestPermission();
-}
-setInterval(() => {
-  const now = new Date();
-  if (now.getHours() === 19 && now.getMinutes() === 0) {
-    if (!store.get("pill-" + TODAY, false)) {
-      if (Notification.permission === "granted") {
-        new Notification("💊 Zeit für deine Pille", {
-          body: "19:00 Uhr — vergiss sie nicht!",
-          icon: "apple-touch-icon.png",
-        });
-      }
-    }
-  }
-}, 60000);
-
-// ---------- Bibeltagebuch ----------
-function renderBibel() {
-  const entries = store.get("bibel", []);
-  const list = $("#bibel-list");
-  list.innerHTML = "";
-  entries.forEach((e) => {
-    const li = document.createElement("li");
-    li.className = "item";
-    const dateStr = new Date(e.date).toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-    li.innerHTML = `
-      <div class="bibel-item-header">
-        <div>
-          ${e.stelle ? `<div class="bibel-entry-stelle"></div>` : ""}
-          <div class="bibel-entry-date">${dateStr}</div>
-        </div>
-        <button class="del">×</button>
-      </div>
-      ${e.vers ? `<div class="bibel-entry-vers"></div>` : ""}
-      ${e.gedanken ? `<div class="bibel-entry-text"></div>` : ""}`;
-    if (e.stelle) li.querySelector(".bibel-entry-stelle").textContent = e.stelle;
-    if (e.vers) li.querySelector(".bibel-entry-vers").textContent = '\u201e' + e.vers + '\u201c';
-    if (e.gedanken) li.querySelector(".bibel-entry-text").textContent = e.gedanken;
-    li.querySelector(".del").onclick = () => {
-      const updated = store.get("bibel", []).filter((x) => x.id !== e.id);
-      store.set("bibel", updated);
-      renderBibel();
-    };
-    list.appendChild(li);
-  });
-  $("#bibel-empty").hidden = entries.length > 0;
-}
-
-$("#bibel-form").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const stelle = $("#bibel-stelle").value.trim();
-  const vers = $("#bibel-vers").value.trim();
-  const gedanken = $("#bibel-gedanken").value.trim();
-  const gebet = $("#bibel-gebet").value.trim();
-  if (!stelle && !gedanken && !vers) return;
-  const entries = store.get("bibel", []);
-  entries.unshift({ id: uid(), date: new Date().toISOString(), stelle, vers, gedanken, gebet });
-  store.set("bibel", entries);
-  $("#bibel-stelle").value = ""; $("#bibel-vers").value = "";
-  $("#bibel-gedanken").value = ""; $("#bibel-gebet").value = "";
-  renderBibel();
-});
-renderBibel();
 
 // ---------- Trainingsplan ----------
 const TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
