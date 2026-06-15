@@ -401,29 +401,57 @@ main { padding: 22px 20px 0; max-width: 600px; margin: 0 auto; }
 
 /* ── Trainingsplan ── */
 .section-intro { font-size: 15px; color: var(--muted); font-style: italic; margin-bottom: 16px; }
-.month-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+
+.week-picker {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 20px;
+  scrollbar-width: none;
 }
-.month-card {
+.week-picker::-webkit-scrollbar { display: none; }
+.week-chip {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-family: var(--body); font-size: 15px;
+  color: var(--muted); cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.week-chip.active {
+  background: var(--accent); border-color: var(--accent);
+  color: #fff;
+}
+
+.training-days { display: flex; flex-direction: column; gap: 10px; }
+.training-day {
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px; cursor: pointer;
-  transition: border-color 0.12s;
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 14px;
   -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.12s;
 }
-.month-card:active { border-color: var(--accent); }
-.month-card.has-content { border-left: 3px solid var(--ok); }
-.month-num { font-size: 11px; color: var(--muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
-.month-name { font-family: var(--serif); font-size: 18px; margin-bottom: 6px; font-weight: 400; }
-.month-preview {
-  font-size: 13px; color: var(--muted); line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.training-day:active { border-color: var(--accent); }
+.training-day.has-plan { border-left: 3px solid var(--ok); }
+.training-day-label {
+  font-family: var(--serif); font-size: 17px;
+  min-width: 36px; flex-shrink: 0;
+}
+.training-day-plan {
+  flex: 1; font-size: 16px;
+  color: var(--muted); font-style: italic;
+  line-height: 1.4;
+}
+.training-day.has-plan .training-day-plan {
+  color: var(--text); font-style: normal;
 }
 
 /* ── Bottom sheet modal ── */

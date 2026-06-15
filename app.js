@@ -437,42 +437,60 @@ $("#bibel-form").addEventListener("submit", (e) => {
 renderBibel();
 
 // ---------- Trainingsplan ----------
-const MONATE = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+const TAGE_LANG = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+let activeWeek = 1;
 
 function renderTraining() {
-  const container = $("#training-months");
+  // Wochenwähler
+  const picker = $("#week-picker");
+  picker.innerHTML = "";
+  for (let w = 1; w <= 12; w++) {
+    const chip = document.createElement("div");
+    chip.className = "week-chip" + (w === activeWeek ? " active" : "");
+    chip.textContent = "Woche " + w;
+    chip.onclick = () => { activeWeek = w; renderTraining(); };
+    picker.appendChild(chip);
+  }
+  // Scroll aktive Woche sichtbar
+  const activeChip = picker.querySelector(".week-chip.active");
+  if (activeChip) activeChip.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
+
+  // Tage der Woche
+  const container = $("#training-days");
   container.innerHTML = "";
-  MONATE.forEach((name, i) => {
-    const plan = store.get("training-" + (i + 1), "");
-    const card = document.createElement("div");
-    card.className = "month-card" + (plan ? " has-content" : "");
-    card.innerHTML = `
-      <div class="month-num">Monat ${i + 1}</div>
-      <div class="month-name"></div>
-      <div class="month-preview"></div>`;
-    card.querySelector(".month-name").textContent = name;
-    card.querySelector(".month-preview").textContent = plan || "Tippe zum Bearbeiten…";
-    card.onclick = () => openMonthSheet(i + 1, name);
-    container.appendChild(card);
+  TAGE.forEach((tag, i) => {
+    const key = "training-w" + activeWeek + "-d" + (i + 1);
+    const plan = store.get(key, "");
+    const row = document.createElement("div");
+    row.className = "training-day" + (plan ? " has-plan" : "");
+    row.innerHTML = `
+      <div class="training-day-label"></div>
+      <div class="training-day-plan"></div>`;
+    row.querySelector(".training-day-label").textContent = tag;
+    row.querySelector(".training-day-plan").textContent = plan || "Kein Training geplant";
+    row.onclick = () => openDaySheet(activeWeek, i + 1, TAGE_LANG[i], key);
+    container.appendChild(row);
   });
 }
 
-function openMonthSheet(monthNum, monthName) {
-  const plan = store.get("training-" + monthNum, "");
+function openDaySheet(week, dayNum, dayName, key) {
+  const plan = store.get(key, "");
   const sheet = document.createElement("div");
   sheet.className = "sheet-overlay";
   sheet.innerHTML = `
     <div class="sheet">
-      <div class="sheet-title">Monat ${monthNum} — ${monthName}</div>
-      <textarea rows="10" placeholder="Dein Plan für diesen Monat…">${plan}</textarea>
+      <div class="sheet-title">Woche ${week} — ${dayName}</div>
+      <textarea rows="6" placeholder="z.B. Laufen 5km, Kraft Oberkörper, Ruhetag…"></textarea>
       <div class="sheet-actions">
         <button class="sheet-cancel">Abbrechen</button>
         <button class="accent-btn sheet-save">Speichern</button>
       </div>
     </div>`;
+  sheet.querySelector("textarea").value = plan;
   sheet.querySelector(".sheet-cancel").onclick = () => document.body.removeChild(sheet);
   sheet.querySelector(".sheet-save").onclick = () => {
-    store.set("training-" + monthNum, sheet.querySelector("textarea").value.trim());
+    store.set(key, sheet.querySelector("textarea").value.trim());
     document.body.removeChild(sheet);
     renderTraining();
   };
