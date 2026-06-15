@@ -116,26 +116,20 @@
 
     <!-- Kalender -->
     <section class="view" data-view="kalender" hidden>
-      <div class="kal-header">
-        <div class="kal-today-big" id="kal-day-num"></div>
-        <div class="kal-today-right">
-          <div class="kal-today-day" id="kal-day-name"></div>
-          <div class="kal-today-month" id="kal-month-name"></div>
-        </div>
+      <div class="kal-month-nav">
+        <button class="kal-nav-btn" id="kal-prev">‹</button>
+        <div class="kal-month-label" id="kal-month-label"></div>
+        <button class="kal-nav-btn" id="kal-next">›</button>
       </div>
-
-      <div class="kal-add-form">
-        <input id="event-input" type="text" placeholder="Neuer Termin…" autocomplete="off" />
-        <div class="kal-add-row">
-          <input id="event-date" type="date" style="flex:1" />
-          <input id="event-time" type="time" style="flex:0.7" />
-          <button class="kal-add-btn" id="event-submit">+</button>
-        </div>
+      <div class="kal-weekdays-row">
+        <span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span>
       </div>
+      <div class="kal-mini-grid" id="kal-mini-grid"></div>
 
-      <div class="kal-section-title" id="kal-section-title"></div>
+      <div class="kal-day-header" id="kal-day-header"></div>
       <div id="event-list"></div>
-      <p id="event-empty" class="kal-empty">Keine Termine — frei wie ein Vogel.</p>
+      <p id="event-empty" class="kal-empty">Kein Termin — frei wie ein Vogel.</p>
+      <button class="kal-add-trigger" id="kal-add-trigger">+ Termin hinzufügen</button>
     </section>
 
     <!-- Routinen -->

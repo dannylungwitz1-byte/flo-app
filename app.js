@@ -106,7 +106,7 @@ renderTasks();
 // ---------- Tagebuch & Stimmung ----------
 const MOODS = [
   { id: 0, label: "Strahlend", color: "#F4C440", color2: "#E0A020",
-    svg: `<svg viewBox="0 0 40 40" width="32" height="32" fill="none">
+    svg: `<svg viewBox="0 0 40 40" width="22" height="22" fill="none">
       <circle cx="14" cy="15" r="2.8" fill="rgba(0,0,0,0.45)"/>
       <circle cx="26" cy="15" r="2.8" fill="rgba(0,0,0,0.45)"/>
       <circle cx="15.5" cy="13.5" r="1.1" fill="white" opacity="0.9"/>
@@ -117,19 +117,19 @@ const MOODS = [
       <path d="M10 6 L12 8.5" stroke="rgba(0,0,0,0.3)" stroke-width="2.2" stroke-linecap="round"/>
     </svg>` },
   { id: 1, label: "Gut", color: "#E8907A", color2: "#C86850",
-    svg: `<svg viewBox="0 0 40 40" width="32" height="32" fill="none">
+    svg: `<svg viewBox="0 0 40 40" width="22" height="22" fill="none">
       <circle cx="14" cy="15" r="2.8" fill="rgba(0,0,0,0.45)"/>
       <circle cx="26" cy="15" r="2.8" fill="rgba(0,0,0,0.45)"/>
       <path d="M12 23 Q20 31 28 23" stroke="rgba(0,0,0,0.45)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
     </svg>` },
   { id: 2, label: "Okay", color: "#82B09A", color2: "#5A906E",
-    svg: `<svg viewBox="0 0 40 40" width="32" height="32" fill="none">
+    svg: `<svg viewBox="0 0 40 40" width="22" height="22" fill="none">
       <circle cx="14" cy="15" r="2.8" fill="rgba(0,0,0,0.4)"/>
       <circle cx="26" cy="15" r="2.8" fill="rgba(0,0,0,0.4)"/>
       <line x1="12" y1="26" x2="28" y2="26" stroke="rgba(0,0,0,0.4)" stroke-width="2.8" stroke-linecap="round"/>
     </svg>` },
   { id: 3, label: "Trüb", color: "#7496B0", color2: "#4E7090",
-    svg: `<svg viewBox="0 0 40 40" width="32" height="32" fill="none">
+    svg: `<svg viewBox="0 0 40 40" width="22" height="22" fill="none">
       <circle cx="14" cy="16" r="2.8" fill="rgba(0,0,0,0.4)"/>
       <circle cx="26" cy="16" r="2.8" fill="rgba(0,0,0,0.4)"/>
       <path d="M11 12.5 Q14 10.5 17 12.5" stroke="rgba(0,0,0,0.35)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
@@ -137,7 +137,7 @@ const MOODS = [
       <path d="M13 29 Q20 22 27 29" stroke="rgba(0,0,0,0.4)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
     </svg>` },
   { id: 4, label: "Schwer", color: "#9485BA", color2: "#6A5898",
-    svg: `<svg viewBox="0 0 40 40" width="32" height="32" fill="none">
+    svg: `<svg viewBox="0 0 40 40" width="22" height="22" fill="none">
       <circle cx="14" cy="17" r="2.8" fill="rgba(0,0,0,0.45)"/>
       <circle cx="26" cy="17" r="2.8" fill="rgba(0,0,0,0.45)"/>
       <path d="M10 11 Q14 14 17 11" stroke="rgba(0,0,0,0.45)" stroke-width="2" fill="none" stroke-linecap="round"/>
@@ -405,98 +405,151 @@ renderListen();
 
 // ---------- Kalender ----------
 let events = store.get("events", []);
+let kalYear = new Date().getFullYear();
+let kalMonth = new Date().getMonth();
+let kalSelected = TODAY;
 
 function renderKalender() {
-  const now = new Date();
-  $("#kal-day-num").textContent = now.getDate();
-  $("#kal-day-name").textContent = now.toLocaleDateString("de-DE", { weekday: "long" });
-  $("#kal-month-name").textContent = now.toLocaleDateString("de-DE", { month: "long", year: "numeric" });
-
-  renderEvents();
+  renderKalGrid();
+  renderKalDayEvents();
 }
 
-function getRelativeLabel(dateStr) {
-  const today = new Date(TODAY + "T00:00:00");
-  const d = new Date(dateStr + "T00:00:00");
-  const diff = Math.round((d - today) / 86400000);
-  if (diff === 0) return "Heute";
-  if (diff === 1) return "Morgen";
-  if (diff === -1) return "Gestern";
-  if (diff > 1 && diff <= 6) return `In ${diff} Tagen`;
-  return null;
-}
+function renderKalGrid() {
+  $("#kal-month-label").textContent = new Date(kalYear, kalMonth, 1)
+    .toLocaleDateString("de-DE", { month: "long", year: "numeric" });
 
-function renderEvents() {
-  const container = $("#event-list");
-  if (!container) return;
-  container.innerHTML = "";
-  const sorted = [...events].sort((a, b) => (a.when || "").localeCompare(b.when || ""));
-  const upcoming = sorted.filter(ev => !ev.when || ev.when >= TODAY + "T00:00");
-  const past = sorted.filter(ev => ev.when && ev.when < TODAY + "T00:00");
-  const allToShow = [...upcoming, ...past];
+  const grid = $("#kal-mini-grid");
+  grid.innerHTML = "";
 
-  if (allToShow.length === 0) {
-    $("#event-empty").hidden = false;
-    const title = $("#kal-section-title");
-    if (title) title.textContent = "";
-    return;
+  const firstDay = new Date(kalYear, kalMonth, 1);
+  const lastDate = new Date(kalYear, kalMonth + 1, 0).getDate();
+  let startDow = firstDay.getDay();
+  startDow = startDow === 0 ? 6 : startDow - 1;
+
+  // Tage mit Terminen als Set
+  const eventDays = new Set(
+    events.map(ev => ev.when ? ev.when.slice(0, 10) : null).filter(Boolean)
+  );
+
+  const addCell = (dStr, otherMonth) => {
+    const cell = document.createElement("div");
+    cell.className = "kal-cell" +
+      (otherMonth ? " other-month" : "") +
+      (dStr === TODAY ? " today" : "") +
+      (dStr === kalSelected && dStr !== TODAY ? " selected" : "");
+    const num = document.createElement("div");
+    num.className = "kal-cell-num";
+    num.textContent = parseInt(dStr.slice(8));
+    cell.appendChild(num);
+    if (eventDays.has(dStr) && !otherMonth) {
+      const dot = document.createElement("div");
+      dot.className = "kal-cell-dot";
+      cell.appendChild(dot);
+    }
+    if (!otherMonth) {
+      cell.onclick = () => { kalSelected = dStr; renderKalGrid(); renderKalDayEvents(); };
+    }
+    grid.appendChild(cell);
+  };
+
+  for (let i = startDow - 1; i >= 0; i--) {
+    const d = new Date(kalYear, kalMonth, -i);
+    addCell(dateKey(d), true);
   }
-  $("#event-empty").hidden = true;
-  const title = $("#kal-section-title");
-  if (title) title.textContent = upcoming.length > 0 ? "Bevorstehende Termine" : "Vergangene Termine";
-
-  allToShow.forEach((ev) => {
-    const card = document.createElement("div");
-    card.className = "event-card";
-    const d = ev.when ? new Date(ev.when) : null;
-
-    let badgeDay = "—", badgeMonth = "";
-    if (d) {
-      badgeDay = d.getDate();
-      badgeMonth = d.toLocaleDateString("de-DE", { month: "short" }).replace(".", "");
-    }
-
-    let timeStr = "";
-    if (d) {
-      const rel = getRelativeLabel(dateKey(d));
-      const dayPart = rel || d.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
-      const timePart = ev.hasTime ? d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) + " Uhr" : "";
-      timeStr = timePart ? `${dayPart}, ${timePart}` : dayPart;
-    } else {
-      timeStr = "ohne Datum";
-    }
-
-    card.innerHTML = `
-      <div class="event-date-badge">
-        <div class="event-badge-day">${badgeDay}</div>
-        <div class="event-badge-month">${badgeMonth}</div>
-      </div>
-      <div class="event-body">
-        <div class="event-title"></div>
-        <div class="event-time"></div>
-      </div>
-      <button class="event-del">×</button>`;
-    card.querySelector(".event-title").textContent = ev.text;
-    card.querySelector(".event-time").textContent = timeStr;
-    card.querySelector(".event-del").onclick = () => {
-      events = events.filter((x) => x.id !== ev.id);
-      store.set("events", events);
-      renderEvents();
-    };
-    container.appendChild(card);
-  });
+  for (let d = 1; d <= lastDate; d++) {
+    addCell(dateKey(new Date(kalYear, kalMonth, d)), false);
+  }
+  const trailing = (7 - ((startDow + lastDate) % 7)) % 7;
+  for (let i = 1; i <= trailing; i++) {
+    addCell(dateKey(new Date(kalYear, kalMonth + 1, i)), true);
+  }
 }
 
-$("#event-submit").addEventListener("click", () => {
-  const text = $("#event-input").value.trim();
-  const date = $("#event-date").value;
-  const time = $("#event-time").value;
-  if (!text) return;
-  const when = date ? (time ? `${date}T${time}` : `${date}T00:00`) : "";
-  events.push({ id: uid(), text, when, hasTime: !!time });
-  store.set("events", events);
-  $("#event-input").value = ""; $("#event-date").value = ""; $("#event-time").value = "";
-  renderEvents();
+function renderKalDayEvents() {
+  const d = new Date(kalSelected + "T00:00:00");
+  const isToday = kalSelected === TODAY;
+  const label = isToday
+    ? "Heute, " + d.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })
+    : d.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  $("#kal-day-header").textContent = label;
+
+  const container = $("#event-list");
+  container.innerHTML = "";
+  const dayEvents = events.filter(ev => ev.when && ev.when.startsWith(kalSelected));
+
+  if (dayEvents.length === 0) {
+    $("#event-empty").hidden = false;
+  } else {
+    $("#event-empty").hidden = true;
+    dayEvents.sort((a, b) => a.when.localeCompare(b.when)).forEach((ev) => {
+      const card = document.createElement("div");
+      card.className = "event-card";
+      const timeStr = ev.hasTime
+        ? new Date(ev.when).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) + " Uhr"
+        : "Ganztägig";
+      card.innerHTML = `
+        <div class="event-accent-line"></div>
+        <div class="event-body">
+          <div class="event-title"></div>
+          <div class="event-time"></div>
+        </div>
+        <button class="event-del">×</button>`;
+      card.querySelector(".event-title").textContent = ev.text;
+      card.querySelector(".event-time").textContent = timeStr;
+      card.querySelector(".event-del").onclick = () => {
+        events = events.filter((x) => x.id !== ev.id);
+        store.set("events", events);
+        renderKalGrid();
+        renderKalDayEvents();
+      };
+      container.appendChild(card);
+    });
+  }
+}
+
+$("#kal-prev").addEventListener("click", () => {
+  kalMonth--; if (kalMonth < 0) { kalMonth = 11; kalYear--; }
+  renderKalGrid();
+});
+$("#kal-next").addEventListener("click", () => {
+  kalMonth++; if (kalMonth > 11) { kalMonth = 0; kalYear++; }
+  renderKalGrid();
+});
+
+$("#kal-add-trigger").addEventListener("click", () => {
+  const sheet = document.createElement("div");
+  sheet.className = "sheet-overlay";
+  sheet.innerHTML = `
+    <div class="sheet">
+      <div class="sheet-title">Neuer Termin</div>
+      <input type="text" id="ev-text" placeholder="Bezeichnung…" autocomplete="off"
+        style="width:100%;font-family:var(--body);font-size:17px;border:1.5px solid var(--border-2);border-radius:12px;padding:12px 16px;background:var(--surface);color:var(--text);outline:none;-webkit-appearance:none;margin-bottom:12px;box-sizing:border-box;"/>
+      <div style="display:flex;gap:8px;margin-bottom:4px">
+        <input type="date" id="ev-date" value="${kalSelected}"
+          style="flex:1;font-family:var(--body);font-size:16px;border:1.5px solid var(--border-2);border-radius:12px;padding:11px 12px;background:var(--surface-2);color:var(--text);outline:none;-webkit-appearance:none;"/>
+        <input type="time" id="ev-time"
+          style="flex:0.8;font-family:var(--body);font-size:16px;border:1.5px solid var(--border-2);border-radius:12px;padding:11px 12px;background:var(--surface-2);color:var(--text);outline:none;-webkit-appearance:none;"/>
+      </div>
+      <div class="sheet-actions">
+        <button class="sheet-cancel">Abbrechen</button>
+        <button class="accent-btn sheet-save">Speichern</button>
+      </div>
+    </div>`;
+  sheet.querySelector(".sheet-cancel").onclick = () => document.body.removeChild(sheet);
+  sheet.querySelector(".sheet-save").onclick = () => {
+    const text = sheet.querySelector("#ev-text").value.trim();
+    const date = sheet.querySelector("#ev-date").value;
+    const time = sheet.querySelector("#ev-time").value;
+    if (!text) return;
+    const when = date ? (time ? `${date}T${time}` : `${date}T00:00`) : "";
+    events.push({ id: uid(), text, when, hasTime: !!time });
+    store.set("events", events);
+    document.body.removeChild(sheet);
+    renderKalGrid();
+    renderKalDayEvents();
+  };
+  document.body.appendChild(sheet);
+  setTimeout(() => sheet.querySelector("#ev-text").focus(), 50);
 });
 
 // ---------- Gewohnheiten ----------
