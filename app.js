@@ -735,24 +735,48 @@ if ("serviceWorker" in navigator) {
 }
 
 // ---------- PILLEN-ERINNERUNG ----------
-function setupPillReminder() {
-  if (!("Notification" in window)) return;
-  if (Notification.permission === "default") {
-    Notification.requestPermission();
+function updateNotifBtn() {
+  const btn = $("#notif-btn");
+  if (!btn) return;
+  if (!("Notification" in window)) { btn.hidden = true; return; }
+  if (Notification.permission === "granted") {
+    btn.textContent = "🔔 Erinnerung aktiv (19:00 Uhr)";
+    btn.style.opacity = "0.5";
+    btn.disabled = true;
+  } else if (Notification.permission === "denied") {
+    btn.textContent = "🔕 Benachrichtigungen blockiert";
+    btn.style.opacity = "0.5";
+    btn.disabled = true;
+  } else {
+    btn.textContent = "🔔 Erinnerung 19:00 Uhr aktivieren";
+    btn.disabled = false;
+    btn.style.opacity = "1";
   }
-  // Jeden Abend um 19:00 prüfen
-  setInterval(() => {
-    const now = new Date();
-    if (now.getHours() === 19 && now.getMinutes() === 0) {
-      if (Notification.permission === "granted") {
-        new Notification("Flo — Pille nehmen 💊", {
-          body: "Vergiss deine Pille nicht! 19:00 Uhr.",
-          icon: "apple-touch-icon.png",
-          tag: "pille-" + dateKey(),
-          renotify: false,
-        });
-      }
-    }
-  }, 30000); // alle 30 Sekunden prüfen
 }
-setupPillReminder();
+
+$("#notif-btn").addEventListener("click", async () => {
+  if (!("Notification" in window)) return;
+  const result = await Notification.requestPermission();
+  updateNotifBtn();
+  if (result === "granted") {
+    new Notification("Flo — Erinnerung aktiv ✓", {
+      body: "Du wirst täglich um 19:00 Uhr erinnert.",
+      icon: "apple-touch-icon.png",
+    });
+  }
+});
+
+updateNotifBtn();
+
+// Jeden Abend um 19:00 Uhr benachrichtigen
+setInterval(() => {
+  const now = new Date();
+  if (now.getHours() === 19 && now.getMinutes() === 0 && Notification.permission === "granted") {
+    new Notification("Flo — Pille nehmen 💊", {
+      body: "Vergiss deine Pille nicht!",
+      icon: "apple-touch-icon.png",
+      tag: "pille-" + dateKey(),
+      renotify: false,
+    });
+  }
+}, 30000);
