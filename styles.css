@@ -276,73 +276,107 @@ main { padding: 22px 20px 0; max-width: 600px; margin: 0 auto; }
 }
 .setup-title {
   font-family: var(--serif);
-  font-size: 20px;
-  font-weight: 400;
-  margin-bottom: 16px;
+  font-size: 20px; font-weight: 400;
+  margin-bottom: 14px;
 }
+.setup-label {
+  display: block; font-size: 13px;
+  color: var(--muted); margin-bottom: 5px;
+}
+.setup-hint { font-size: 13px; color: var(--muted); font-style: italic; }
+.setup-card input[type="date"],
+.setup-card input[type="number"] {
+  font-family: var(--body); font-size: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 10px 12px;
+  background: var(--bg); color: var(--text);
+  outline: none; -webkit-appearance: none;
+}
+.setup-card input:focus { border-color: var(--accent); }
 .accent-btn {
   background: var(--accent);
   color: #fff; border: none;
   border-radius: var(--radius);
   padding: 12px 20px;
-  font-family: var(--body);
-  font-size: 16px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.phase-card {
-  border-radius: var(--radius);
-  padding: 26px 20px;
-  margin-bottom: 14px;
-  background: var(--accent-soft);
-  border: 1.5px solid var(--accent);
-  text-align: center;
-}
-.phase-day { font-size: 13px; color: var(--muted); margin-bottom: 4px; font-style: italic; }
-.phase-name { font-family: var(--serif); font-size: 28px; margin-bottom: 8px; }
-.phase-desc { font-size: 16px; color: var(--muted); font-style: italic; line-height: 1.5; }
-.pill-reminder {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-  display: flex; align-items: center; gap: 14px;
-  margin-bottom: 14px;
-}
-.pill-icon { font-size: 28px; flex-shrink: 0; }
-.pill-info { flex: 1; }
-.pill-title { font-size: 17px; font-weight: 600; }
-.pill-time { font-size: 14px; color: var(--muted); }
-.pill-btn {
-  background: var(--ok); color: #fff;
-  border: none; border-radius: 10px;
-  padding: 10px 14px;
-  font-family: var(--body); font-size: 14px;
+  font-family: var(--body); font-size: 16px;
   cursor: pointer; white-space: nowrap;
-  transition: background 0.15s;
 }
-.pill-btn.taken { background: var(--surface-2); color: var(--muted); }
-.phase-guide {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-  margin-bottom: 20px;
+
+/* ── Kalender ── */
+.cal-nav {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
 }
-.guide-title {
-  font-family: var(--serif);
-  font-size: 18px; font-weight: 400;
+.cal-month-title {
+  font-family: var(--serif); font-size: 20px; font-weight: 400;
+}
+.cal-nav-btn {
+  background: none; border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 4px 14px;
+  font-size: 22px; color: var(--text); cursor: pointer;
+  line-height: 1.3; -webkit-tap-highlight-color: transparent;
+}
+.cal-weekdays {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 12px; color: var(--muted);
+  margin-bottom: 6px;
+}
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 3px; margin-bottom: 16px;
+}
+.cal-day {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: space-between;
+  padding: 4px 2px 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  background: var(--surface-2);
+  user-select: none;
+}
+.cal-day.other-month { opacity: 0.25; pointer-events: none; }
+.cal-day.today { box-shadow: 0 0 0 2px var(--accent); }
+.cal-day.phase-mens    { background: #F2DADA; }
+.cal-day.phase-follikel { background: #D4EADB; }
+.cal-day.phase-eisprung { background: #F2E0D8; }
+.cal-day.phase-luteal  { background: #E4DCDA; }
+.cal-day.phase-pause {
+  background: repeating-linear-gradient(
+    45deg, #EDE5DC, #EDE5DC 3px, #F5EFE8 3px, #F5EFE8 8px
+  );
+}
+.cal-num {
+  font-size: 12px; font-family: var(--body); line-height: 1;
+  color: var(--text);
+}
+.cal-day.other-month .cal-num { color: var(--muted); }
+.cal-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.cal-dot.taken  { background: var(--ok); }
+.cal-dot.missed { background: #C07A7A; }
+
+.cal-legend {
+  display: flex; flex-wrap: wrap; gap: 8px 14px;
   margin-bottom: 14px;
 }
-.phase-row {
-  display: flex; align-items: flex-start;
-  gap: 10px; margin-bottom: 10px;
-  font-size: 15px; line-height: 1.5;
+.legend-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 13px; color: var(--muted);
 }
-.phase-dot {
-  width: 11px; height: 11px;
-  border-radius: 50%; flex-shrink: 0;
-  margin-top: 5px;
+.legend-swatch {
+  width: 13px; height: 13px; border-radius: 3px; flex-shrink: 0;
+}
+.pause-swatch {
+  background: repeating-linear-gradient(
+    45deg, #EDE5DC, #EDE5DC 3px, #F5EFE8 3px, #F5EFE8 8px
+  );
+  border: 1px solid var(--border);
 }
 
 /* ── Bibeltagebuch ── */

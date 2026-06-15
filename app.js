@@ -311,14 +311,61 @@ $("#goal-btn").addEventListener("click", () => {
 });
 
 // ---------- Zyklus & Pille ----------
-const PHASEN = [
-  { bis: 5,  name: "Menstruation",  desc: "Ruhe und Wärme. Dein Körper regeneriert sich.",       color: "#C07A7A" },
-  { bis: 13, name: "Follikelphase", desc: "Energie steigt. Gute Zeit für neue Projekte.",          color: "#7A9E87" },
-  { bis: 16, name: "Eisprung",      desc: "Höchste Energie und Kreativität. Du strahlst!",         color: "#C9897A" },
-  { bis: 99, name: "Lutealphase",   desc: "Innehalten und auf dich hören. Sei sanft zu dir.",      color: "#9B8579" },
-];
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
 
-function getPhase(day) { return PHASEN.find((p) => day <= p.bis); }
+function getDayInCycle(dateStr, data) {
+  const start = new Date(data.start);
+  start.setHours(0, 0, 0, 0);
+  const d = new Date(dateStr + "T00:00:00");
+  const diff = Math.floor((d - start) / 86400000);
+  if (diff < 0) return null;
+  return (diff % (data.length || 28)) + 1;
+}
+
+function phaseClass(dayInCycle, pillDays) {
+  if (dayInCycle === null) return "";
+  if (dayInCycle > pillDays) return "phase-pause";
+  if (dayInCycle <= 5)  return "phase-mens";
+  if (dayInCycle <= 13) return "phase-follikel";
+  if (dayInCycle <= 16) return "phase-eisprung";
+  return "phase-luteal";
+}
+
+function buildCalDay(dateStr, data, pillDays, otherMonth) {
+  const cell = document.createElement("div");
+  cell.className = "cal-day";
+  if (otherMonth) { cell.classList.add("other-month"); }
+  if (dateStr === TODAY) cell.classList.add("today");
+
+  const dayInCycle = getDayInCycle(dateStr, data);
+  const cls = phaseClass(dayInCycle, pillDays);
+  if (cls) cell.classList.add(cls);
+
+  const numEl = document.createElement("span");
+  numEl.className = "cal-num";
+  numEl.textContent = parseInt(dateStr.slice(8));
+  cell.appendChild(numEl);
+
+  const dot = document.createElement("div");
+  dot.className = "cal-dot";
+  const isPillDay = dayInCycle !== null && dayInCycle <= pillDays;
+  if (isPillDay && !otherMonth) {
+    const taken = store.get("pill-" + dateStr, false);
+    const future = dateStr > TODAY;
+    if (taken) dot.classList.add("taken");
+    else if (!future) dot.classList.add("missed");
+
+    if (!future) {
+      cell.addEventListener("click", () => {
+        store.set("pill-" + dateStr, !store.get("pill-" + dateStr, false));
+        renderZyklus();
+      });
+    }
+  }
+  cell.appendChild(dot);
+  return cell;
+}
 
 function renderZyklus() {
   const data = store.get("zyklus", null);
@@ -333,44 +380,71 @@ function renderZyklus() {
   setupEl.hidden = true;
   displayEl.hidden = false;
 
-  const start = new Date(data.start);
-  start.setHours(0, 0, 0, 0);
-  const todayDate = new Date();
-  todayDate.setHours(0, 0, 0, 0);
-  const diffDays = Math.floor((todayDate - start) / 86400000);
-  const cycleLen = data.length || 28;
-  const day = (diffDays % cycleLen) + 1;
-  const phase = getPhase(day);
+  const pillDays = data.pillDays || 21;
 
-  $("#phase-day").textContent = `Tag ${day} von ${cycleLen}`;
-  $("#phase-name").textContent = phase.name;
-  $("#phase-desc").textContent = phase.desc;
-  $("#phase-card").style.borderColor = phase.color;
+  // Monat-Titel
+  $("#cal-month-title").textContent = new Date(calYear, calMonth, 1)
+    .toLocaleDateString("de-DE", { month: "long", year: "numeric" });
 
-  const pillTaken = store.get("pill-" + TODAY, false);
-  const pillBtn = $("#pill-btn");
-  pillBtn.textContent = pillTaken ? "Heute genommen ✓" : "Als genommen markieren";
-  pillBtn.className = "pill-btn" + (pillTaken ? " taken" : "");
-  pillBtn.onclick = () => {
-    store.set("pill-" + TODAY, true);
-    renderZyklus();
-  };
+  // Kalender-Grid aufbauen
+  const grid = $("#cal-grid");
+  grid.innerHTML = "";
+
+  const firstDay = new Date(calYear, calMonth, 1);
+  const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
+
+  // Mo=0 … So=6
+  let startDow = firstDay.getDay();
+  startDow = startDow === 0 ? 6 : startDow - 1;
+
+  // Vormonat auffüllen
+  for (let i = startDow - 1; i >= 0; i--) {
+    const d = new Date(calYear, calMonth, -i);
+    grid.appendChild(buildCalDay(dateKey(d), data, pillDays, true));
+  }
+  // Aktueller Monat
+  for (let d = 1; d <= lastDate; d++) {
+    grid.appendChild(buildCalDay(dateKey(new Date(calYear, calMonth, d)), data, pillDays, false));
+  }
+  // Nachmonat auffüllen
+  const total = startDow + lastDate;
+  const trailing = (7 - (total % 7)) % 7;
+  for (let i = 1; i <= trailing; i++) {
+    const d = new Date(calYear, calMonth + 1, i);
+    grid.appendChild(buildCalDay(dateKey(d), data, pillDays, true));
+  }
 }
 
 $("#setup-save-btn").addEventListener("click", () => {
   const start = $("#period-start").value;
   const length = parseInt($("#cycle-length-input").value) || 28;
+  const pillDays = parseInt($("#pill-days-input").value) || 21;
   if (!start) return;
-  store.set("zyklus", { start, length });
+  store.set("zyklus", { start, length, pillDays });
+  renderZyklus();
+});
+
+$("#cal-prev").addEventListener("click", () => {
+  calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderZyklus();
+});
+$("#cal-next").addEventListener("click", () => {
+  calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
   renderZyklus();
 });
 
 $("#zyklus-edit-btn").addEventListener("click", () => {
+  const data = store.get("zyklus", null);
+  if (data) {
+    $("#period-start").value = data.start;
+    $("#cycle-length-input").value = data.length || 28;
+    $("#pill-days-input").value = data.pillDays || 21;
+  }
   $("#zyklus-setup").hidden = false;
   $("#zyklus-display").hidden = true;
 });
 
-// Pillenerinnerung: Browser-Notification wenn App offen ist um 19:00
+// Pillenerinnerung um 19:00
 if ("Notification" in window && Notification.permission === "default") {
   Notification.requestPermission();
 }
