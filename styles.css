@@ -687,7 +687,7 @@ main { padding: 24px 18px 0; max-width: 600px; margin: 0 auto; }
 .journal-page-date { font-size: 13px; color: var(--muted-2); }
 .journal-textarea {
   width: 100%; border: none; background: transparent;
-  font-family: 'Caveat', cursive; font-size: 20px;
+  font-family: 'Shadows Into Light Two', cursive; font-size: 19px;
   line-height: 36px; padding: 9px 16px 14px 56px;
   color: var(--text); resize: none; outline: none; min-height: 192px;
   background-image: repeating-linear-gradient(
